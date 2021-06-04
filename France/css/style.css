@@ -1,0 +1,29 @@
+.info{
+    border:1px solid black;
+    height: 200px;
+    width: 300px;
+    border-radius: 20px;
+    float:right;
+    margin-top: 100;
+    padding-left: 5%;
+}
+
+.header{
+    border:1px solid black;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    padding-left: 50px;
+}
+
+.infosSup{
+    display: flex;
+    padding-left: 100;
+    padding-right: 100;
+}
+
+.subInfo{
+    
+    flex:1;
+    margin-top: 20;
+    margin-bottom: 20;
+}
