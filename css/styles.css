@@ -1,0 +1,29 @@
+body {
+    background-color:rgb(66, 66, 66);
+}
+
+h1 {
+    color: beige;
+}
+
+/*.container {
+    display: inline-block;
+}*/
+
+.text {
+    display:block;
+    float:left;
+    background-color:rgb(155, 155, 155);
+    color: beige;
+    margin: 1em;
+    padding: 1em;
+    border-radius: 0.5em;
+    /*border: solid 10px rgb(163, 163, 163) ;*/
+}
+
+.map {
+    display:block;
+    float:left;
+    background-color:rgb(191,191,191);
+    border-radius: 0.5em;
+}
