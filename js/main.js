@@ -47,23 +47,4 @@ d3.json(geoJsonUrl, function(error, geojson) {
          
 });
 
-/*d3.json(url, function(error, bb) { 
-    if (error) throw error;
 
-    var bbox = d3.select('body').node().getBoundingClientRect()
-    var width = window.innerWidth;
-    var height = window.innerHeight;
-    var projection = d3.geoEqualEarth();
-    projection.fitExtent([[20, 20], [width, height]], bb);
-    var geoGenerator = d3.geoPath().projection(projection);
-    var svg = d3.select("body").append('svg')
-        .style("width", "100%")
-        .style("height", "100%");
-    svg.append('g').selectAll('path')
-    .data(bb.features)
-    .enter()
-        .append('path')
-        .attr('d', geoGenerator)
-        .attr('fill', '#088')
-        .attr('stroke', '#000');
-});*/

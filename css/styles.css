@@ -6,9 +6,40 @@ h1 {
     color: beige;
 }
 
-/*.container {
-    display: inline-block;
-}*/
+#activities {
+    background-color: white;
+    text-align: center;
+    height: 50px;
+    color: black;
+}
+
+.mode {
+    border: none;
+    background: none;
+    text-transform: uppercase;
+    height: 100%;
+    font-weight: 700;
+    color: black;
+    letter-spacing: 1px;
+    font-size: inherit;
+    transition: all 0.3s;
+    outline: none;
+}
+
+.mode:active {
+    color: white;
+    background: black;
+}
+
+button:hover {
+    color: white;
+    background: black;
+}
+
+.selected {
+    color: white;
+    background: black;
+}
 
 .text {
     display:block;
