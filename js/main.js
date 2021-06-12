@@ -9,7 +9,7 @@ let dataset = []; //full dataset
 let timeCurrentActivity = []; //tableau des minutes pour une activité / une période / un sexe (ou le total), trié par rapport au nom du pays alphabétiquement
 let correspondingCountries = []; //même taille que timeCurrentActivity, correspondingCountries[i] est le pays dont l'activité dure timeCurrentActivity[i] 
 
-let currentActivity = "Homework";
+let currentActivity = "Total";
 let currentSex = "Total";
 let currentPeriod = "All days of the week";
 
@@ -218,4 +218,6 @@ for (let i = 0; i < allActivities.length; i++) {
   button.innerHTML = activityName;
   document.getElementById("activities").appendChild(button);  
   button.onclick = function(){changeActivity(id)};
+
+  if (i==0) document.getElementById(id).classList.add('selected');
 }    
