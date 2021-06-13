@@ -7,23 +7,16 @@
     </head>
 
     <body>
-        <h1>Europe</h1>
-        <div id="activities"> </div>
+        <h1>Europe - Time of Use</h1>
+        <div id="activitiesContainer">
+            <div id="activities"> </div>
+        </div>
+
+        
         <div class="container">
             <div class="map"></div>
             <div class="text"></div>
         </div>
-
-        <script>
-            function changeActivity(id) {
-                document.getElementById(id).classList.add('selected');
-                console.log(id, "selected");
-                if ( document.getElementByClass("mode").classList.contains('selected') )
-
-                document.getElementById("MyElement").classList.toggle('MyClass');
-            }
-        </script>
-
         <script type="text/javascript" src="js/d3/d3.js"></script>
         <script type="text/javascript" src="js/main.js"></script>
     </body>
