@@ -13,6 +13,9 @@ let currentActivity = "Total";
 let currentSex = "Total";
 let currentPeriod = "All days of the week";
 
+let mostDoneActivityMeanCoordinate = [];
+let centroidCountryCoordinates = [];
+
 
 /*let allActivities = ["Total"
 ,"Personal care"
@@ -133,6 +136,26 @@ colorCountries = d3.scaleSequential()
 });
 
 
+function calculCenterEachCountry(country){
+  let arrayOfCoordinates = country.geometry.coordinates[0][0];
+  let centroid_x = 0;
+  let centroid_y = 0;
+  for (let i = 0; i < arrayOfCoordinates.length; i++) {
+    centroid_x += arrayOfCoordinates[i][0];
+    centroid_y += arrayOfCoordinates[i][1];
+  }
+  centroid_x/=arrayOfCoordinates.length;
+  centroid_y/=arrayOfCoordinates.length;
+  centroidCountryCoordinates.push([centroid_x,centroid_y]);
+
+  let img = document.createElement("img");
+  img.src = "../data/laundry2.png";
+  img.style.left = centroid_x - img.width/2 + "px";
+  img.style.top = centroid_y - img.height/2 +"px";
+  img.style.position = "absolute";
+  document.getElementsByTagName("svg")[0].appendChild(img);
+}
+
 // ---------------- load map -------------------- //
 // A projection tells D3 how to orient the GeoJSON features
 let europeProjection = d3.geoMercator()
@@ -153,6 +176,9 @@ d3.json(geoJsonUrl, function(error, geojson) {
           .attr("d", pathGenerator) // This is where the magic happens
           .attr("stroke", "grey") // Color of the lines themselves
           .style("fill", function(d) { 
+            calculCenterEachCountry(d);
+
+            //on colorie avec le temps de l'activité (-1 si pas de temps)
             let timeUse = -1;
             let nameCountry = d.properties.name;
             for (let i = 0; i < correspondingCountries.length; i++) {
@@ -208,8 +234,7 @@ function changeActivity(id) {
   .domain(d3.extent(timeCurrentActivity))
   .interpolator(d3.interpolateHcl("yellow", "red"));
 
-  svg.selectAll("path")
-          .attr("d", pathGenerator) // This is where the magic happens
+  svg.selectAll("path") // This is where the magic happens
           .style("fill", function(d) { 
             let timeUse = -1;
             let nameCountry = d.properties.name;
@@ -222,6 +247,7 @@ function changeActivity(id) {
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 }
+
 
 // add activities to html
 for (let i = 0; i < allActivities.length; i++) {
@@ -238,3 +264,4 @@ for (let i = 0; i < allActivities.length; i++) {
 
   if (i==0) document.getElementById(id).classList.add('selected');
 }    
+
