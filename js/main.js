@@ -1,6 +1,6 @@
 // Setting up the svg element for D3 to draw in
-let w = 600
-let h = 600
+let w = 1280
+let h = 720
 
 let text = d3.select(".text");
 
@@ -80,7 +80,7 @@ let svg = d3.select(".map")
             .append("svg")
             .attr("width", w)
             .attr("height", h)
-            .attr("align", "center"); 
+            .attr("align","center");
 
 // ---------------- load dataset -------------------- //
 d3.tsv("../data/data.csv")
@@ -127,8 +127,72 @@ colorActivities = d3.scaleSequential()
 .interpolator(d3.interpolateHcl("yellow", "red"));
 });
 
-console.log("Country :",currentCountry,", Times :",timeCurrentCountry);
-console.log("Activity :",currentActivity,", Times :",timeCurrentActivity);
+function getCountriesCentroid(){
+  
+  let nodes = d3.selectAll("path").nodes();
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    // let bbox = node.getBBox();
+    // let centroid = [bbox.x + bbox.width/3, bbox.y + bbox.height/3];
+
+    let arrayOfCoordinates = node.__data__.geometry.coordinates[node.__data__.geometry.coordinates.length-1][0]; //on prend le tableau avec le plus de coordonnées pour correspondre au pays sans les iles
+    let centroid_x = 0;
+    let centroid_y = 0;
+    for (let i = 0; i < arrayOfCoordinates.length; i++) {
+      centroid_x += arrayOfCoordinates[i][0];
+      centroid_y += arrayOfCoordinates[i][1];
+    }
+    centroid_x/=arrayOfCoordinates.length;
+    centroid_y/=arrayOfCoordinates.length;
+
+    centroid_pixel_x = europeProjection([centroid_x,centroid_y])[0];
+    centroid_pixel_y = europeProjection([centroid_x,centroid_y])[1];
+
+    svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
+    .attr("fill","black").style("background-color","white");
+     
+  }
+}
+
+function calculCenterEachCountry(country){
+
+  // let arrayOfCoordinates = country.geometry.coordinates[country.geometry.coordinates.length-1][0]; //on prend le tableau avec le plus de coordonnées pour correspondre au pays sans les iles
+  // let centroid_x = 0;
+  // let centroid_y = 0;
+  // for (let i = 0; i < arrayOfCoordinates.length; i++) {
+  //   centroid_x += arrayOfCoordinates[i][0];
+  //   centroid_y += arrayOfCoordinates[i][1];
+  // }
+  // centroid_x/=arrayOfCoordinates.length;
+  // centroid_y/=arrayOfCoordinates.length;
+
+  // centroid_pixel_x = europeProjection([centroid_x,centroid_y])[0];
+  // centroid_pixel_y = europeProjection([centroid_x,centroid_y])[1];
+  
+  // console.log(country.getBBox());
+   
+
+  // let img = document.createElement("img");
+  // img.src = "../data/laundry2.png";
+
+  // console.log(document.getElementsByTagName("svg")[0].style);
+  // img.style.left = (centroid_pixel_x - img.width/2)+ "px";
+  // img.style.top = (centroid_pixel_y - img.height/2)+150+"px";
+
+  // //console.log([centroid_x,centroid_y]," ",europeProjection([centroid_x,centroid_y]));
+
+  // img.style.position = "absolute";
+  // document.getElementsByClassName("map")[0].appendChild(img);
+
+  // let button = document.createElement("BUTTON");
+  // button.innerHTML = country.properties.name; 
+  // button.style.position = "absolute";
+  // let margintop = document.getElementsByClassName("container")[0].getBoundingClientRect().top;
+  // let marginLeft = -10//document.getElementsByClassName("container")[0].getBoundingClientRect().left;
+  // button.style.left = centroid_pixel_x + marginLeft+"px";
+  // button.style.top = centroid_pixel_y  + margintop+"px";
+  // document.getElementsByClassName("map")[0].appendChild(button);  
+}
 
 // ---------------- load map -------------------- //
 // A projection tells D3 how to orient the GeoJSON features
@@ -150,7 +214,8 @@ d3.json(geoJsonUrl, function(error, geojson) {
           .attr("d", pathGenerator) // This is where the magic happens
           .attr("stroke", "grey") // Color of the lines themselves
           .style("fill", function(d) { 
-
+            
+            //on colorie avec le temps de l'activité (-1 si pas de temps)
             let timeUse = -1;
             let nameCountry = d.properties.name;
             for (let i = 0; i < correspondingCountries.length; i++) {
@@ -177,6 +242,8 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 .style("left", "-500px")
                 .style("top", "-500px");
         });
+        getCountriesCentroid();
+        
 });
 
 //pour changer d'activité          
@@ -208,8 +275,7 @@ function changeActivity(id) {
   .domain(d3.extent(timeCurrentActivity))
   .interpolator(d3.interpolateHcl("yellow", "red"));
 
-  svg.selectAll("path")
-          .attr("d", pathGenerator) // This is where the magic happens
+  svg.selectAll("path") // This is where the magic happens
           .style("fill", function(d) { 
             let timeUse = -1;
             let nameCountry = d.properties.name;
@@ -221,7 +287,12 @@ function changeActivity(id) {
             }
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
+
 }
+
+
+
+
 
 // add activities to html
 for (let i = 0; i < allActivities.length; i++) {
