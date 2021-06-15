@@ -13,27 +13,10 @@ let currentActivity = "Total";
 let currentSex = "Total";
 let currentPeriod = "All days of the week";
 
-
-/*let allActivities = ["Total"
-,"Personal care"
-,"Sleep"
-,"Eating"
-,"Sleep"
-,"Eating"
-,"Sleep"
-,"Eating"
-,"Sleep"
-,"Eating"
-,"Personal care"
-,"Personal care"
-,"Personal care"
-,"Sleep"
-,"Eating"
-,"Sleep"
-,"Eating"
-,"Sleep"
-,"Eating"
-,"Other and/or unspecified personal care"];*/
+let colorActivities;
+let currentCountry = "Belgium";
+let timeCurrentCountry = [];
+let correspondingActivities = [];
 
 let allActivities = ["Total"
 ,"Personal care"
@@ -101,7 +84,7 @@ let svg = d3.select(".map")
 
 // ---------------- load dataset -------------------- //
 d3.tsv("../data/data.csv")
-.row( (d, i) => {
+.row((d, i) => {
   return {
         country: d.GEO,
           period: d.DAYSWEEK,
@@ -123,15 +106,29 @@ for (let i = 0; i < dataset.length; i++) {
 
   if (data["activity"]==currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod){
     timeCurrentActivity.push(data["minutes"]); 
-  correspondingCountries.push(data["country"]);   
-}
-}
+    correspondingCountries.push(data["country"]);   
+}}
 console.log("Activity :",currentActivity,", Times :",timeCurrentActivity);
 colorCountries = d3.scaleSequential()
 .domain(d3.extent(timeCurrentActivity))
 .interpolator(d3.interpolateHcl("yellow", "red"));
+
+for (let i = 0; i < dataset.length; i++) {
+  const data = dataset[i];
+
+  if (data["country"]==currentCountry && data["sex"] == currentSex && data["period"] == currentPeriod){
+    timeCurrentCountry.push(data["minutes"]); 
+    correspondingActivities.push(data["activity"]);
+}}
+console.log("Country :",currentCountry,", Times :",timeCurrentCountry);
+
+colorActivities = d3.scaleSequential()
+.domain(d3.extent(timeCurrentCountry))
+.interpolator(d3.interpolateHcl("yellow", "red"));
 });
 
+console.log("Country :",currentCountry,", Times :",timeCurrentCountry);
+console.log("Activity :",currentActivity,", Times :",timeCurrentActivity);
 
 // ---------------- load map -------------------- //
 // A projection tells D3 how to orient the GeoJSON features
@@ -153,14 +150,17 @@ d3.json(geoJsonUrl, function(error, geojson) {
           .attr("d", pathGenerator) // This is where the magic happens
           .attr("stroke", "grey") // Color of the lines themselves
           .style("fill", function(d) { 
+
             let timeUse = -1;
             let nameCountry = d.properties.name;
             for (let i = 0; i < correspondingCountries.length; i++) {
               const country = correspondingCountries[i];
+
               if (nameCountry == country){
                 timeUse = timeCurrentActivity[i];
               }
             }
+
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
           .on("click", function(d) {
@@ -235,6 +235,120 @@ for (let i = 0; i < allActivities.length; i++) {
   button.onclick = function() { 
     changeActivity(id)
   };
-
   if (i==0) document.getElementById(id).classList.add('selected');
-}    
+}   
+
+/*
+// Pie Chart
+var width = 100;
+var height = 100;
+//var data = [2, 4, 8, 10];
+
+// Create SVG element
+var svg_ = d3.select(".map")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+            //.attr("align", "center"); 
+
+/*var svg_ = d3.select(".charts"),
+    width = svg_.attr("width"),
+    height = svg_.attr("height"),*/
+
+/*
+var radius = Math.min(width, height) / 2;
+var g = svg_.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var color = d3.scaleOrdinal(['#4daf4a','#377eb8','#ff7f00','#984ea3','#e41a1c']);
+
+// Generate the pie
+var pie = d3.pie();
+
+// Generate the arcs
+var arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius);
+
+//Generate groups
+var arcs = g.selectAll("arc")
+            .data(pie(timeCurrentCountry))
+            .enter()
+            .append("g")
+            .attr("class", "arc")
+
+//Draw arc paths
+arcs.append("path")
+    .attr("fill", function(d, i) {
+        return color(i);
+    })
+    .attr("d", arc);
+*/
+// set the dimensions and margins of the graph
+var width = 450
+    height = 450
+    margin = 40
+
+// The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
+var radius = Math.min(width, height) / 2 - margin
+
+// append the svg object to the div called 'my_dataviz'
+var svg_ = d3.select(".charts")
+  .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+  .append("g")
+    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+// Create dummy data
+//var data = {a: 9, b: 20, c:30, d:8, e:12, f:8, g:12, h:8, i:12}
+var ent={};
+for (let i = 0; i < allActivities.length; i++) {
+  const time = timeCurrentCountry[i];
+  const activity = correspondingActivities[i];
+  console.log(activity);
+  ent.activity = time;  
+}
+console.log(" zefae ", JSON.stringify(ent));
+
+// set the color scale
+var color = d3.scaleOrdinal()
+  .domain(data)
+  .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+
+// Compute the position of each group on the pie:
+var pie = d3.pie()
+  .value(function(d) {return d.value; })
+
+  /*var name=[];
+  var age=[];
+  name.push('sulfikar');
+  age.push('24');
+  var ent={};
+  for(var i=0;i<name.length;i++)
+  {
+  ent.name=name[i];
+  ent.age=age[i];
+  }*/
+  
+
+
+  
+console.log(JSON.stringify(want));
+console.log("ee",want)
+var data_ready = pie(d3.entries(want))
+
+// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+svg_
+  .selectAll('whatever')
+  .data(data)
+  .enter()
+  .append('path')
+  .attr('d', d3.arc()
+    .innerRadius(0)
+    .outerRadius(radius)
+  )
+  .attr('fill', function(d){ return(color(d.data.key)) })
+
+  .attr("stroke", "black")
+  .style("stroke-width", "2px")
+  .style("opacity", 0.7)
