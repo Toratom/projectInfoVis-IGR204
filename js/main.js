@@ -15,7 +15,7 @@ let currentPeriod = "All days of the week";
 
 let colorActivities;
 let currentCountry = "Belgium";
-let timeCurrentCountry = [];
+var timeCurrentCountry = [];
 let correspondingActivities = [];
 
 let allActivities = ["Total"
@@ -84,48 +84,51 @@ let svg = d3.select(".map")
 
 // ---------------- load dataset -------------------- //
 d3.tsv("../data/data.csv")
-.row((d, i) => {
-  return {
-        country: d.GEO,
-          period: d.DAYSWEEK,
-          sex: d.SEX,
-          activity: d.ACL00,
-          minutes: +d.Value
-        };
-    })
-.get((error, rows) => {
-  console.log("Loaded " + rows.length + " rows");
-  if (rows.length > 0) {
-    console.log("First row: ", rows[0])
-      console.log("Last  row: ", rows[rows.length-1])
-    }
+  .row((d, i) => {
+    return {
+          country: d.GEO,
+            period: d.DAYSWEEK,
+            sex: d.SEX,
+            activity: d.ACL00,
+            minutes: +d.Value
+          };
+      })
+  .get((error, rows) => {
+    console.log("Loaded " + rows.length + " rows");
+    if (rows.length > 0) {
+      console.log("First row: ", rows[0])
+        console.log("Last  row: ", rows[rows.length-1])
+      }
 
   dataset = rows;
-for (let i = 0; i < dataset.length; i++) {
-  const data = dataset[i];
 
-  if (data["activity"]==currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod){
+for (let i = 0; i < dataset.length; i++) {
+  let data = dataset[i];
+
+  if (data["activity"]==currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod) {
     timeCurrentActivity.push(data["minutes"]); 
-    correspondingCountries.push(data["country"]);   
-}}
-console.log("Activity :",currentActivity,", Times :",timeCurrentActivity);
-colorCountries = d3.scaleSequential()
-.domain(d3.extent(timeCurrentActivity))
-.interpolator(d3.interpolateHcl("yellow", "red"));
-
-for (let i = 0; i < dataset.length; i++) {
-  const data = dataset[i];
-
-  if (data["country"]==currentCountry && data["sex"] == currentSex && data["period"] == currentPeriod){
+    correspondingCountries.push(data["country"]);
+  }
+    
+  if (data["country"]==currentCountry && data["sex"] == currentSex && data["period"] == currentPeriod) {
     timeCurrentCountry.push(data["minutes"]); 
     correspondingActivities.push(data["activity"]);
-}}
+  }
+}
+
+console.log("Activity :",currentActivity,", Times :",timeCurrentActivity);
+
+colorCountries = d3.scaleSequential()
+                .domain(d3.extent(timeCurrentActivity))
+                .interpolator(d3.interpolateHcl("yellow", "red"));
+
 console.log("Country :",currentCountry,", Times :",timeCurrentCountry);
 
 colorActivities = d3.scaleSequential()
-.domain(d3.extent(timeCurrentCountry))
-.interpolator(d3.interpolateHcl("yellow", "red"));
+                .domain(d3.extent(timeCurrentCountry))
+                .interpolator(d3.interpolateHcl("yellow", "red"));
 });
+
 
 function getCountriesCentroid(){
   
@@ -235,13 +238,16 @@ d3.json(geoJsonUrl, function(error, geojson) {
             text.html("Country: " + d.properties.name)  
                 .style("left", (d3.event.pageX + 30) + "px")     
                 .style("top", (d3.event.pageY - 30) + "px")
+            test(d.properties.name, "Total", svg_tot);
+            test(d.properties.name, "Females", svg_female);
+            test(d.properties.name, "Males", svg_male);
         })
-        .on("mouseout", function(d) {
+        /*.on("mouseout", function(d) {
             text.style("opacity", 0);
             text.html("")
                 .style("left", "-500px")
                 .style("top", "-500px");
-        });
+        });*/
         getCountriesCentroid();
         
 });
@@ -269,13 +275,11 @@ function changeActivity(id) {
     }
   }
 
-  console.log(timeCurrentActivity);
-
   colorCountries = d3.scaleSequential()
-  .domain(d3.extent(timeCurrentActivity))
-  .interpolator(d3.interpolateHcl("yellow", "red"));
+                  .domain(d3.extent(timeCurrentActivity))
+                  .interpolator(d3.interpolateHcl("yellow", "red"));
 
-  svg.selectAll("path") // This is where the magic happens
+  svg.selectAll("path") // Create the path
           .style("fill", function(d) { 
             let timeUse = -1;
             let nameCountry = d.properties.name;
@@ -285,13 +289,11 @@ function changeActivity(id) {
                 timeUse = timeCurrentActivity[i];
               }
             }
+
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
 }
-
-
-
 
 
 // add activities to html
@@ -306,120 +308,194 @@ for (let i = 0; i < allActivities.length; i++) {
   button.onclick = function() { 
     changeActivity(id)
   };
+
   if (i==0) document.getElementById(id).classList.add('selected');
 }   
 
-/*
-// Pie Chart
-var width = 100;
-var height = 100;
-//var data = [2, 4, 8, 10];
+//Pie Charts
 
-// Create SVG element
-var svg_ = d3.select(".map")
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height);
-            //.attr("align", "center"); 
-
-/*var svg_ = d3.select(".charts"),
-    width = svg_.attr("width"),
-    height = svg_.attr("height"),*/
-
-/*
-var radius = Math.min(width, height) / 2;
-var g = svg_.append("g").attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
-
-var color = d3.scaleOrdinal(['#4daf4a','#377eb8','#ff7f00','#984ea3','#e41a1c']);
-
-// Generate the pie
-var pie = d3.pie();
-
-// Generate the arcs
-var arc = d3.arc()
-            .innerRadius(0)
-            .outerRadius(radius);
-
-//Generate groups
-var arcs = g.selectAll("arc")
-            .data(pie(timeCurrentCountry))
-            .enter()
-            .append("g")
-            .attr("class", "arc")
-
-//Draw arc paths
-arcs.append("path")
-    .attr("fill", function(d, i) {
-        return color(i);
-    })
-    .attr("d", arc);
-*/
 // set the dimensions and margins of the graph
-var width = 450
-    height = 450
+var width = 200
+    height = 200
     margin = 40
 
 // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
 var radius = Math.min(width, height) / 2 - margin
 
-// append the svg object to the div called 'my_dataviz'
-var svg_ = d3.select(".charts")
-  .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-  .append("g")
-    .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+var svg_tot = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-// Create dummy data
-//var data = {a: 9, b: 20, c:30, d:8, e:12, f:8, g:12, h:8, i:12}
-var ent={};
-for (let i = 0; i < allActivities.length; i++) {
-  const time = timeCurrentCountry[i];
-  const activity = correspondingActivities[i];
-  console.log(activity);
-  ent.activity = time;  
+var svg_female = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var svg_male = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var color;
+
+function changeCountry(countryName, sex, svg_graph) {
+  //pie charts update
+  //currentCountry = countryName;
+  timeCurrentCountry = [];
+  correspondingActivities = [];
+  for (let i = 0; i < dataset.length; i++) {
+    const data = dataset[i];
+    if (data["country"]==countryName && data["sex"] == sex && data["period"] == currentPeriod && data['activity']!='Total'){
+      timeCurrentCountry.push(data["minutes"]); 
+      correspondingActivities.push(data["activity"]);   
+    }
+  }
+
+  var have = [];
+
+  for (let i = 0; i < 10; i++) {
+    const time = timeCurrentCountry[i];
+    const activity = correspondingActivities[i];
+    have.push([activity, time]);
+  }
+
+  let want = new Map(have);
+
+  // Using Reduce
+  want = have.reduce((a, v) => {
+    a[v[0]] = v[1];
+    return a;
+  }, {});
+
+  // set the color scale
+  color = d3.scaleOrdinal()
+              .domain(want)
+              .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+              //.range(d3.schemeDark2);
+
+  /*var color = d3.scaleOrdinal()
+  .domain(correspondingActivities)
+  .range(d3.schemeDark2);*/
+
+  // Compute the position of each group on the pie:
+  var pie = d3.pie()
+             .value(function(d) {return d.value; })
+
+  var data_ready = pie(d3.entries(want))
+
+  var arcGenerator = d3.arc()
+                      .innerRadius(0)
+                      .outerRadius(radius)
+
+  // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+  svg_graph.selectAll('whatever')
+          .data(data_ready)
+          .enter()
+          .append('path')
+          .attr('d', arcGenerator)
+          /*.attr('d', d3.arc()
+            .innerRadius(0)
+            .outerRadius(radius)
+          )*/
+          .attr('fill', function(d){ return(color(d.data.key)) })
+          .attr("stroke", "black")
+          .style("stroke-width", "2px")
+          .style("opacity", 0.7)
+
+  var k = 3;
+  svg_graph.selectAll('mySlices')
+          .data(data_ready)
+          .enter()
+          .append('text')
+          .text(function(d){ if (k > 0) { 
+            k -= 1;
+            return d.data.key;
+          }
+          else return ""})
+          .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
+          .style("text-anchor", "middle")
+          .style("font-size", 17)
+
 }
-console.log(" zefae ", JSON.stringify(ent));
 
-// set the color scale
-var color = d3.scaleOrdinal()
-  .domain(data)
-  .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
+function update(data, svg_graph) {
 
-// Compute the position of each group on the pie:
-var pie = d3.pie()
-  .value(function(d) {return d.value; })
+  // Compute the position of each group on the pie:
+  var pie = d3.pie()
+    .value(function(d) {return d.value; })
+    .sort(function(a, b) { console.log(a) ; return d3.ascending(a.key, b.key);} ) // This make sure that group order remains the same in the pie chart
+  var data_ready = pie(d3.entries(data))
 
-  /*var name=[];
-  var age=[];
-  name.push('sulfikar');
-  age.push('24');
-  var ent={};
-  for(var i=0;i<name.length;i++)
-  {
-  ent.name=name[i];
-  ent.age=age[i];
-  }*/
+  // map to data
+  var u = svg_graph.selectAll("path")
+    .data(data_ready)
+
+  // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+  u
+    .enter()
+    .append('path')
+    .merge(u)
+    .transition()
+    .duration(1000)
+    .attr('d', d3.arc()
+      .innerRadius(0)
+      .outerRadius(radius)
+    )
+    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr("stroke", "white")
+    .style("stroke-width", "2px")
+    .style("opacity", 1)
+
+  // remove the group that is not present anymore
+  u
+    .exit()
+    .remove()
+
+}
+
+function test(countryName, sex, svg_graph) {
+    //pie charts update
+    //currentCountry = countryName;
+    timeCurrentCountry = [];
+    correspondingActivities = [];
+    for (let i = 0; i < dataset.length; i++) {
+      const data = dataset[i];
+      if (data["country"]==countryName && data["sex"] == sex && data["period"] == currentPeriod && data['activity']!='Total'){
+        timeCurrentCountry.push(data["minutes"]); 
+        correspondingActivities.push(data["activity"]);   
+      }
+    }
   
-
-
+    var have = [];
   
-console.log(JSON.stringify(want));
-console.log("ee",want)
-var data_ready = pie(d3.entries(want))
+    for (let i = 0; i < 10; i++) {
+      const time = timeCurrentCountry[i];
+      const activity = correspondingActivities[i];
+      have.push([activity, time]);
+    }
+  
+    let want = new Map(have);
+  
+    // Using Reduce
+    want = have.reduce((a, v) => {
+      a[v[0]] = v[1];
+      return a;
+    }, {});
+  update(want, svg_graph)
+}
 
-// Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-svg_
-  .selectAll('whatever')
-  .data(data)
-  .enter()
-  .append('path')
-  .attr('d', d3.arc()
-    .innerRadius(0)
-    .outerRadius(radius)
-  )
-  .attr('fill', function(d){ return(color(d.data.key)) })
 
-  .attr("stroke", "black")
-  .style("stroke-width", "2px")
-  .style("opacity", 0.7)
+function tttt() {
+  changeCountry("France", "Total", svg_tot);
+  changeCountry("France", "Females", svg_female);
+  changeCountry("France", "Males", svg_male);
+}
+
+
