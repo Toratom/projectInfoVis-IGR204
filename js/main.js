@@ -154,7 +154,7 @@ function getCountriesCentroid(){
   }
 }
 
-function calculCenterEachCountry(country){
+/*function calculCenterEachCountry(country){
 
   // let arrayOfCoordinates = country.geometry.coordinates[country.geometry.coordinates.length-1][0]; //on prend le tableau avec le plus de coordonnées pour correspondre au pays sans les iles
   // let centroid_x = 0;
@@ -192,7 +192,7 @@ function calculCenterEachCountry(country){
   // button.style.left = centroid_pixel_x + marginLeft+"px";
   // button.style.top = centroid_pixel_y  + margintop+"px";
   // document.getElementsByClassName("map")[0].appendChild(button);  
-}
+}*/
 
 // ---------------- load map -------------------- //
 // A projection tells D3 how to orient the GeoJSON features
@@ -225,7 +225,6 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 timeUse = timeCurrentActivity[i];
               }
             }
-
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
           .on("click", function(d) {
@@ -243,6 +242,7 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 .style("top", "-500px");
         });
         getCountriesCentroid();
+       
         
 });
 
@@ -269,7 +269,9 @@ function changeActivity(id) {
     }
   }
 
-  console.log(timeCurrentActivity);
+  console.log("activtiesTime",timeCurrentActivity);
+  console.log("countries",correspondingCountries);
+  console.log("timeCurrentCountry",timeCurrentCountry);
 
   colorCountries = d3.scaleSequential()
   .domain(d3.extent(timeCurrentActivity))
@@ -372,11 +374,12 @@ var svg_ = d3.select(".charts")
 
 // Create dummy data
 //var data = {a: 9, b: 20, c:30, d:8, e:12, f:8, g:12, h:8, i:12}
+
 var ent={};
 for (let i = 0; i < allActivities.length; i++) {
   const time = timeCurrentCountry[i];
   const activity = correspondingActivities[i];
-  console.log(activity);
+  
   ent.activity = time;  
 }
 console.log(" zefae ", JSON.stringify(ent));
