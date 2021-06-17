@@ -18,6 +18,14 @@ let currentCountry = "Belgium";
 var timeCurrentCountry = [];
 let correspondingActivities = [];
 
+//pour voir le pays qui fait le plus l'activité
+let indexCountryMostDoComputing = 0;
+let indexCountryMostDoSleep = 0;
+let indexCountryMostDoEating = 0;
+let indexCountryMostDoStudy = 0;
+let indexCountryMostDoLaundry = 0;
+let indexCountryMostDoPets =0;
+
 let allActivities = ["Total"
 ,"Personal care"
 ,"Sleep"
@@ -75,6 +83,24 @@ let allActivities = ["Total"
 ,"Unspecified travel"
 ,"Unspecified time use"];
 
+function getCountryThatDoesMostActivity(activity){
+
+  let index_country = 0;
+  let timeActivityCountryMax = 0;
+  let indexCurrent = 0;
+  for (let i = 0; i < dataset.length; i++) {
+    const data = dataset[i];
+    if (data["activity"]==activity && data["sex"] == currentSex && data["period"] == currentPeriod){
+      if (data["minutes"]>timeActivityCountryMax){
+        index_country = indexCurrent;
+        timeActivityCountryMax = data["minutes"];
+      }
+      indexCurrent+=1;
+    }
+  }
+  return index_country;
+}
+
 // Create SVG element
 let svg = d3.select(".map")
             .append("svg")
@@ -127,34 +153,46 @@ console.log("Country :",currentCountry,", Times :",timeCurrentCountry);
 colorActivities = d3.scaleSequential()
                 .domain(d3.extent(timeCurrentCountry))
                 .interpolator(d3.interpolateHcl("yellow", "red"));
+
+
+//pour voir le pays qui fait le plus l'activité
+indexCountryMostDoComputing = getCountryThatDoesMostActivity("Computer games");
+indexCountryMostDoSleep = getCountryThatDoesMostActivity("Sleep");
+indexCountryMostDoEating = getCountryThatDoesMostActivity("Eating");
+indexCountryMostDoStudy = getCountryThatDoesMostActivity("Study");
+indexCountryMostDoLaundry = getCountryThatDoesMostActivity("Laundry");
+indexCountryMostDoPets = getCountryThatDoesMostActivity("Caring for pets");
 });
 
 
-function getCountriesCentroid(){
+
+
+function getCountryCentroid(country){
   
   let nodes = d3.selectAll("path").nodes();
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
-    // let bbox = node.getBBox();
-    // let centroid = [bbox.x + bbox.width/3, bbox.y + bbox.height/3];
-
-    let arrayOfCoordinates = node.__data__.geometry.coordinates[node.__data__.geometry.coordinates.length-1][0]; //on prend le tableau avec le plus de coordonnées pour correspondre au pays sans les iles
-    let centroid_x = 0;
-    let centroid_y = 0;
-    for (let i = 0; i < arrayOfCoordinates.length; i++) {
-      centroid_x += arrayOfCoordinates[i][0];
-      centroid_y += arrayOfCoordinates[i][1];
+    if (node.__data__.properties.name==country){
+      
+      // let bbox = node.getBBox();
+      // let centroid = [bbox.x + bbox.width/3, bbox.y + bbox.height/3];
+  
+      let arrayOfCoordinates = node.__data__.geometry.coordinates[node.__data__.geometry.coordinates.length-1][0]; //on prend le tableau avec le plus de coordonnées pour correspondre au pays sans les iles
+      let centroid_x = 0;
+      let centroid_y = 0;
+      for (let i = 0; i < arrayOfCoordinates.length; i++) {
+        centroid_x += arrayOfCoordinates[i][0];
+        centroid_y += arrayOfCoordinates[i][1];
+      }
+      centroid_x/=arrayOfCoordinates.length;
+      centroid_y/=arrayOfCoordinates.length;
+  
+      centroid_pixel_x = europeProjection([centroid_x,centroid_y])[0];
+      centroid_pixel_y = europeProjection([centroid_x,centroid_y])[1];
     }
-    centroid_x/=arrayOfCoordinates.length;
-    centroid_y/=arrayOfCoordinates.length;
-
-    centroid_pixel_x = europeProjection([centroid_x,centroid_y])[0];
-    centroid_pixel_y = europeProjection([centroid_x,centroid_y])[1];
-
-    svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
-    .attr("fill","black").style("background-color","white");
-     
+    
   }
+  return [centroid_pixel_x,centroid_pixel_y];
 }
 
 /*function calculCenterEachCountry(country){
@@ -217,15 +255,30 @@ d3.json(geoJsonUrl, function(error, geojson) {
           .attr("d", pathGenerator) // This is where the magic happens
           .attr("stroke", "grey") // Color of the lines themselves
           .style("fill", function(d) { 
+            //Pour colorier le pays (heatmap) et mettre le logo au pays qui fait le plus l'activité
             
             //on colorie avec le temps de l'activité (-1 si pas de temps)
             let timeUse = -1;
             let nameCountry = d.properties.name;
+
             for (let i = 0; i < correspondingCountries.length; i++) {
               const country = correspondingCountries[i];
 
               if (nameCountry == country){
                 timeUse = timeCurrentActivity[i];
+                [centroid_pixel_x,centroid_pixel_y] = getCountryCentroid(country);
+                // svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
+                // .attr("fill","black").style("background-color","white");
+                
+                //pour voir pays qui fait le plus l'activité
+                if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_computer_50px.png");
+                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png");
+                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png");
+                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png");
+                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_dog_50px.png");
+                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_laundry_50px.png");
+
+
               }
             }
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
@@ -247,7 +300,6 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 .style("left", "-500px")
                 .style("top", "-500px");
         });*/
-        getCountriesCentroid();
        
         
 });
