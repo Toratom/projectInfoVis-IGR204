@@ -15,6 +15,7 @@ let currentPeriod = "All days of the week";
 
 let colorActivities;
 let currentCountry = "Belgium";
+let init = true;
 var timeCurrentCountry = [];
 let correspondingActivities = [];
 
@@ -290,6 +291,7 @@ d3.json(geoJsonUrl, function(error, geojson) {
             }
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
+
           .on("click", function(d) {
             text.transition()        
                 .duration(200)
@@ -297,9 +299,11 @@ d3.json(geoJsonUrl, function(error, geojson) {
             text.html("Country: " + d.properties.name)  
                 .style("left", (d3.event.pageX + 30) + "px")     
                 .style("top", (d3.event.pageY - 30) + "px")
-            test(d.properties.name, "Total", svg_tot);
-            test(d.properties.name, "Females", svg_female);
-            test(d.properties.name, "Males", svg_male);
+
+            changePieChart(d.properties.name, "Total", svg_tot)
+            changePieChart(d.properties.name, "Females", svg_female)
+            changePieChart(d.properties.name, "Males", svg_male)
+
         })
         /*.on("mouseout", function(d) {
             text.style("opacity", 0);
@@ -404,7 +408,7 @@ var svg_male = d3.select(".charts")
 
 var color;
 
-function changeCountry(countryName, sex, svg_graph) {
+function initPieChart(countryName, sex, svg_graph) {
   //pie charts update
   //currentCountry = countryName;
   timeCurrentCountry = [];
@@ -464,9 +468,9 @@ function changeCountry(countryName, sex, svg_graph) {
             .outerRadius(radius)
           )*/
           .attr('fill', function(d){ return(color(d.data.key)) })
-          .attr("stroke", "black")
+          .attr("stroke", "white")
           .style("stroke-width", "2px")
-          .style("opacity", 0.7)
+          .style("opacity", 0.9)
 
   var k = 3;
   svg_graph.selectAll('mySlices')
@@ -484,7 +488,7 @@ function changeCountry(countryName, sex, svg_graph) {
 
 }
 
-function update(data, svg_graph) {
+function updatePieChart(data, svg_graph) {
 
   // Compute the position of each group on the pie:
   var pie = d3.pie()
@@ -510,7 +514,7 @@ function update(data, svg_graph) {
     .attr('fill', function(d){ return(color(d.data.key)) })
     .attr("stroke", "white")
     .style("stroke-width", "2px")
-    .style("opacity", 1)
+    .style("opacity", 0.9)
 
   // remove the group that is not present anymore
   u
@@ -519,7 +523,7 @@ function update(data, svg_graph) {
 	
 }
 
-function test(countryName, sex, svg_graph) {
+function changePieChart(countryName, sex, svg_graph) {
     //pie charts update
     //currentCountry = countryName;
     timeCurrentCountry = [];
@@ -547,14 +551,13 @@ function test(countryName, sex, svg_graph) {
       a[v[0]] = v[1];
       return a;
     }, {});
-  update(want, svg_graph)
+    updatePieChart(want, svg_graph)
 }
 
 
-function tttt() {
-  changeCountry("France", "Total", svg_tot);
-  changeCountry("France", "Females", svg_female);
-  changeCountry("France", "Males", svg_male);
+function init2() {
+  initPieChart("France", "Total", svg_tot)
+  initPieChart("France", "Females", svg_female)
+  initPieChart("France", "Males", svg_male)
 }
-
 
