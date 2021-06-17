@@ -25,6 +25,9 @@ let indexCountryMostDoEating = 0;
 let indexCountryMostDoStudy = 0;
 let indexCountryMostDoLaundry = 0;
 let indexCountryMostDoPets =0;
+let indexCountryMostDoTravel =0;
+let indexCountryMostDoChildcare =0;
+
 
 let allActivities = ["Total"
 ,"Personal care"
@@ -161,7 +164,9 @@ indexCountryMostDoSleep = getCountryThatDoesMostActivity("Sleep");
 indexCountryMostDoEating = getCountryThatDoesMostActivity("Eating");
 indexCountryMostDoStudy = getCountryThatDoesMostActivity("Study");
 indexCountryMostDoLaundry = getCountryThatDoesMostActivity("Laundry");
-indexCountryMostDoPets = getCountryThatDoesMostActivity("Caring for pets");
+indexCountryMostDoPets = getCountryThatDoesMostActivity("Walking the dog");
+indexCountryMostDoChildcare = getCountryThatDoesMostActivity("Childcare, except teaching, reading and talking");
+indexCountryMostDoTravel = getCountryThatDoesMostActivity("Travel except travel related to jobs");
 });
 
 
@@ -276,7 +281,9 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png");
                 if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png");
                 if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_dog_50px.png");
-                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_laundry_50px.png");
+                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png");
+                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png");
+                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png");
 
 
               }
