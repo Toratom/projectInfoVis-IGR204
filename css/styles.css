@@ -93,6 +93,8 @@ button:hover {
 
 .container {
     position: relative;
+    display: flex;
+    justify-content: space-between;
 }
 
 .text {
@@ -108,15 +110,11 @@ button:hover {
 }
 
 .solarOrbit {
-    display: block;
-    float : right;
     background-color:rgb(191,191,191);
     border-radius: 0.5em;
 }
 
 .map {
-    display: block;
-    float : left;
     display: inline-block;
     background-color:rgb(191,191,191);
     border-radius: 0.5em;

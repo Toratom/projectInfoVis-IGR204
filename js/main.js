@@ -1,7 +1,6 @@
 // Setting up the svg element for D3 to draw in
 let w = window.innerWidth / 2. - 20
 let h = window.innerHeight / 1.5
-document.getElementsByClassName('container')[0].style.height = h + "px"
 
 let text = d3.select(".text");
 
@@ -10,7 +9,7 @@ let dataset = []; //full dataset
 let timeCurrentActivity = []; //tableau des minutes pour une activité / une période / un sexe (ou le total), trié par rapport au nom du pays alphabétiquement
 let correspondingCountries = []; //même taille que timeCurrentActivity, correspondingCountries[i] est le pays dont l'activité dure timeCurrentActivity[i] 
 
-let currentActivity = "Total";
+let currentActivity = "Personal care";
 let currentSex = "Total";
 let currentPeriod = "All days of the week";
 
@@ -119,6 +118,8 @@ let europeProjection = d3.geoMercator()
 .center([ 13, 52 ])
 .scale([ w / 1.5 ])
 .translate([ 0.5 * w , 0.6 * h ])
+
+
 function loadMap(){
 // The path generator uses the projection to convert the GeoJSON
 // geometry to a set of coordinates that D3 can understand
@@ -165,12 +166,17 @@ d3.json(geoJsonUrl, function(error, geojson) {
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
-          .on("click", function(d) {          
-            text.html("Country: " + d.properties.name)  
-            changePieChart(d.properties.name, "Total", svg_tot)
-            changePieChart(d.properties.name, "Females", svg_female)
-            changePieChart(d.properties.name, "Males", svg_male)
+          .on("click", function(d) {
+            //Click pays update currentCountry     
+            currentCountry = d.properties.name
+            
+            text.html("Country: " + d.properties.name)
+            updateSO()
 
+            // changePieChart(d.properties.name, "Total", svg_tot)
+            // changePieChart(d.properties.name, "Females", svg_female)
+            // changePieChart(d.properties.name, "Males", svg_male)
+            
         })
         /*.on("mouseout", function(d) {
             text.style("opacity", 0);
@@ -241,8 +247,8 @@ indexCountryMostDoChildcare = getCountryThatDoesMostActivity("Childcare, except 
 indexCountryMostDoTravel = getCountryThatDoesMostActivity("Travel except travel related to jobs");
 
 loadMap();
+initSO()
 });
-
 
 
 function getCountryCentroid(country){
@@ -272,6 +278,176 @@ function getCountryCentroid(country){
   }
   return [centroid_pixel_x,centroid_pixel_y];
 }
+
+// ---------------- Solar Orbit -------------------- //
+function getDMax(c) {
+  let dmax = -1.
+  let d = 0.
+
+  for (i = 0; i < timeCurrentActivity.length; i++) {
+      d = Math.abs(timeCurrentActivity[i] -  timeCurrentActivity[c])
+      if (d > dmax) dmax = d
+  }
+  return dmax
+}
+
+
+let svgSO = d3.select(".solarOrbit").append("svg").attr("width", w).attr("height", h)
+let dotR = 8.
+let rMax = h/2. - 10.
+let centerPosX = w / 2.
+let centerPosY = h / 2.
+let nbOfScaleCercles = 5
+//dessine les échelles
+for (i = 0; i < nbOfScaleCercles; i++) {
+  svgSO.append("circle")
+  .attr('class', 'scaleCercle')
+  .attr("cx", centerPosX)
+  .attr("cy", centerPosY)
+  .attr("r", 0)
+  .attr("fill", "none")
+  .attr("stroke", "gray")
+  .attr("stroke-width", "1")
+  .attr("stroke-dasharray", "5,10,5")
+}
+
+
+function initSO(){
+  timeCurrentActivity = [];
+  for (let i = 0; i < dataset.length; i++) {
+    const data = dataset[i];
+
+    if (data["activity"] == currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod){
+      timeCurrentActivity.push(data["minutes"]); 
+      correspondingCountries.push(data["country"]);   
+    }
+  }
+  let N = timeCurrentActivity.length
+  console.log(N)
+  let rMin = (N * dotR) / Math.PI
+  let center = correspondingCountries.indexOf(currentCountry)
+  let dMax = getDMax(center) //a update quand center change
+  let theta  = 2 * Math.PI / (N + 1)
+
+  //Mais à jour les echelles car N a possiblement change donc rmin aussi
+  svgSO.selectAll(".scaleCercle").attr("r", (d, i) => {return (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin})
+
+  svgSO.selectAll("line")
+        .data(timeCurrentActivity)
+        .enter()
+        .append("line")
+        .attr("x1", centerPosX)
+        .attr("y1", centerPosY)
+        .attr("x2", (d, index) => {
+            if (index == center) return centerPosX
+            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+            return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
+        })
+        .attr("y2", (d, index) => {
+            if (index == center) return centerPosY
+            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+            return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+        })
+        .attr('stroke-width', '1')
+        .attr('stroke', 'black')
+  
+  svgSO.selectAll("circle")
+        .filter(function() {
+          return !this.classList.contains("scaleCercle")
+        })
+        .data(timeCurrentActivity)
+        .enter()
+        .append("circle")
+        .attr('class', 'dot')
+        .attr("r", (d) => dotR)
+        .attr("cx", (d, index)=> {
+            if(index != center) {
+                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
+            }
+            else{
+                return centerPosX
+            }
+        })
+        .attr("cy", (d, index)=>{ 
+            if(index != center) {
+                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+            }
+            else {
+                return centerPosY;
+            }
+        })
+        .attr("fill", (d, index) => {
+            color = d3.interpolate("red", "blue")(index / N)
+            //color = ((index==center)?"red": "black")
+            return color
+        })
+}
+
+function updateSO(){
+  let N = timeCurrentActivity.length
+  let rMin = (N * dotR) / Math.PI
+  let center = correspondingCountries.indexOf(currentCountry)
+  let dMax = getDMax(center) //a update quand center change
+  let theta  = 2 * Math.PI / (N + 1)
+
+  //Mais à jour les echelles car N a possiblement change donc rmin aussi
+  svgSO.selectAll(".scaleCercle").attr("r", (d, i) => {return (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin})
+
+  var pathLine = svgSO.selectAll("line").data(timeCurrentActivity)
+  pathLine.enter()
+        .append("line")
+        .merge(pathLine)
+        .transition()
+        .duration(1000)
+        .attr("x1", centerPosX)
+        .attr("y1", centerPosY)
+        .attr("x2", (d, index) => {
+            if (index == center) return centerPosX
+            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+            return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
+        })
+        .attr("y2", (d, index) => {
+            if (index == center) return centerPosY
+            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+            return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+        })
+  pathLine.exit().remove()
+  
+  var pathDot = svgSO.selectAll(".dot").data(timeCurrentActivity)
+  pathDot.enter()
+        .append("circle")
+        .merge(pathDot)
+        .transition()
+        .duration(1000)
+        .attr("r", (d) => dotR)
+        .attr("cx", (d, index)=> {
+            if(index != center) {
+                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
+            }
+            else{
+                return centerPosX
+            }
+        })
+        .attr("cy", (d, index)=>{ 
+            if(index != center) {
+                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+            }
+            else {
+                return centerPosY;
+            }
+        })
+        .attr("fill", (d, index) => {
+            color = d3.interpolate("red", "blue")(index / N)
+            //color = ((index==center)?"red": "black")
+            return color
+        })
+  pathDot.exit().remove()
+}
+//Fin solar orbit
 
 /*function calculCenterEachCountry(country){
 
@@ -353,7 +529,8 @@ function changeActivity(id) {
 
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
-
+  //Update le solor orbite
+  updateSO()
 }
 
 
@@ -370,7 +547,7 @@ for (let i = 0; i < allActivities.length; i++) {
     changeActivity(id)
   };
 
-  if (i==0) document.getElementById(id).classList.add('selected');
+  if (i==1) document.getElementById(id).classList.add('selected');
 }   
 
 //Pie Charts
@@ -576,112 +753,3 @@ function searchActivities() {
     }
   }
 }
-
-
-//Solar orbit
-
-let datasetSO = []
-for (i = 0; i < 20 ; i++){
-  datasetSO = [ Math.random() * 10, ...datasetSO]
-}
-
-function getDMax(c) {
-    let dmax = -1.
-    let d = 0.
-
-    for (i = 0; i < datasetSO.length; i++) {
-        d = Math.abs(datasetSO[i] -  datasetSO[c])
-        if (d > dmax) dmax = d
-    }
-    return dmax
-}
-
-let N = datasetSO.length
-let center = 0
-let dotR = 10.
-let dMax = getDMax(center) //a update quand center change
-let rMin = (N * dotR) / Math.PI
-let rMax = 5. * rMin
-let theta  = 2 * Math.PI / (N + 1)
-let centerPosX = rMax + 10
-let centerPosY = rMax + 10
-let nbOfScaleCercles = 10
-
-
-let svgSO = d3.select(".solarOrbit").append("svg").attr("width", w).attr("height", h)
-//dessine les échelles
-for (i = 0; i < nbOfScaleCercles; i++) {
-    let r = (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin
-    svgSO.append("circle")
-    .attr("cx", centerPosX)
-    .attr("cy", centerPosY)
-    .attr("r", r)
-    .attr("fill", "none")
-    .attr("stroke", "gray")
-    .attr("stroke-width", "1")
-    .attr("stroke-dasharray", "5,10,5")
-}
-
-
-function draw(){
-  svgSO.selectAll("line")
-        .data(datasetSO)
-        .enter()
-        .append("line")
-        .attr("x1", centerPosX)
-        .attr("y1", centerPosY)
-        .attr("x2", (d, index) => {
-            if (index == center) return centerPosX
-            let distanceToCenter = Math.abs(d -  datasetSO[center])
-            return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
-        })
-        .attr("y2", (d, index) => {
-            if (index == center) return centerPosY
-            let distanceToCenter = Math.abs(d -  datasetSO[center])
-            return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
-        })
-        .attr('stroke-width', '1')
-        .attr('stroke', 'black')
-    
-  svgSO.selectAll("circle").filter("dot") //Pour eviter interference avec les cercles de l'échelle ajoute une classe (?) dot et filtre
-        .data(datasetSO)
-        .enter()
-        .append("circle")
-        .attr("r", (d) => dotR)
-        .attr("cx", (d, index)=> {
-            if(index != center) {
-                let distanceToCenter = Math.abs(d -  datasetSO[center])
-                return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
-            }
-            else{
-                return centerPosX
-            }
-        })
-        .attr("cy", (d, index)=>{ 
-            if(index != center) {
-                let distanceToCenter = Math.abs(d -  datasetSO[center])
-                return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
-            }
-            else {
-                return centerPosY;
-            }
-        })
-        .attr("fill", (d, index) => {
-            color = d3.interpolate("red", "blue")(index / N)
-            //color = ((index==center)?"red": "black")
-            return color
-        })
-        
-        console.log("test")
-        // svg.append("g")
-        // .attr("class", "x axis")
-        // .attr("transform", "translate(0, " + (h)  +")")
-        // .call(d3.axisBottom(x))
-        // svg.append("g")
-        //     .attr("class", "y axis")
-        //     .call(d3.axisRight(y))
-    
-}
-
-draw()
-
