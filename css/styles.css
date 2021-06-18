@@ -107,6 +107,16 @@ button:hover {
     border-radius: 0.5em;
 }
 
+.activityName {
+    position: absolute;
+    background-color:rgb(155, 155, 155);
+    color: beige;
+    top: 0;
+    left: 0;
+    margin: 1em;
+    padding: 1em;
+}
+
 .solarOrbit {
     position:relative;
     background-color:rgb(191,191,191);
@@ -117,4 +127,8 @@ button:hover {
     position:relative;
     background-color:rgb(191,191,191);
     border-radius: 0.5em;
+}
+
+.map::after {
+    clear: both;
 }

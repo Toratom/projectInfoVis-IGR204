@@ -3,6 +3,7 @@ let w = window.innerWidth / 2. - 20
 let h = window.innerHeight / 1.5
 
 let text = d3.select(".text");
+let activityName = d3.select(".activityName");
 
 let colorCountries; //colorisateur pour la heatmap
 let dataset = []; //full dataset
@@ -25,9 +26,9 @@ let indexCountryMostDoSleep = 0;
 let indexCountryMostDoEating = 0;
 let indexCountryMostDoStudy = 0;
 let indexCountryMostDoLaundry = 0;
-let indexCountryMostDoPets =0;
-let indexCountryMostDoTravel =0;
-let indexCountryMostDoChildcare =0;
+let indexCountryMostDoPets = 0;
+let indexCountryMostDoTravel = 0;
+let indexCountryMostDoChildcare = 0;
 
 
 let allActivities = ["Total"
@@ -126,7 +127,9 @@ function loadMap(){
 let pathGenerator = d3.geoPath().projection(europeProjection)
 let geoJsonUrl = '../data/europe_features.json';
 d3.json(geoJsonUrl, function(error, geojson) { 
+
     if (error) throw error; 
+
     // Tell D3 to render a path for each GeoJSON feature
     svg.selectAll("path")
           .data(geojson.features)
@@ -163,19 +166,24 @@ d3.json(geoJsonUrl, function(error, geojson) {
 
               }
             }
+
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
           .on("click", function(d) {
+
+            changePieChart(d.properties.name, "Total", svg_tot, 0, 5)
+            changePieChart(d.properties.name, "Females", svg_female, 0, 5)
+            changePieChart(d.properties.name, "Males", svg_male, 0, 5)
+            changePieChart(d.properties.name, "Total", svg_tot_details, 5, 10)
+            changePieChart(d.properties.name, "Females", svg_female_details, 5, 10)
+            changePieChart(d.properties.name, "Males", svg_male_details, 5, 10)
+
             //Click pays update currentCountry     
             currentCountry = d.properties.name
             
             text.html("Country: " + d.properties.name)
             updateSO()
-
-            // changePieChart(d.properties.name, "Total", svg_tot)
-            // changePieChart(d.properties.name, "Females", svg_female)
-            // changePieChart(d.properties.name, "Males", svg_male)
             
         })
         /*.on("mouseout", function(d) {
@@ -183,9 +191,7 @@ d3.json(geoJsonUrl, function(error, geojson) {
             text.html("")
                 .style("left", "-500px")
                 .style("top", "-500px");
-        });*/
-       
-        
+        });*/        
 });
 }
 
@@ -246,14 +252,15 @@ indexCountryMostDoPets = getCountryThatDoesMostActivity("Walking the dog");
 indexCountryMostDoChildcare = getCountryThatDoesMostActivity("Childcare, except teaching, reading and talking");
 indexCountryMostDoTravel = getCountryThatDoesMostActivity("Travel except travel related to jobs");
 
-loadMap();
+loadMap()
+initFirstPieChart()
 initSO()
 });
 
 
 function getCountryCentroid(country){
   
-  let nodes = d3.selectAll("path").nodes();
+  let nodes = svg.selectAll("path").nodes();
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (node.__data__.properties.name==country){
@@ -587,9 +594,30 @@ var svg_male = d3.select(".charts")
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var color;
+var svg_tot_details = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-function initPieChart(countryName, sex, svg_graph) {
+var svg_female_details = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var svg_male_details = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var colorPieChart;
+
+function initPieChart(countryName, sex, svg_graph, start, stop) {
   //pie charts update
   //currentCountry = countryName;
   timeCurrentCountry = [];
@@ -604,7 +632,7 @@ function initPieChart(countryName, sex, svg_graph) {
 
   var have = [];
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = start; i < stop; i++) {
     const time = timeCurrentCountry[i];
     const activity = correspondingActivities[i];
     have.push([activity, time]);
@@ -619,7 +647,7 @@ function initPieChart(countryName, sex, svg_graph) {
   }, {});
 
   // set the color scale
-  color = d3.scaleOrdinal()
+  colorPieChart = d3.scaleOrdinal()
               .domain(want)
               .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
               //.range(d3.schemeDark2);
@@ -639,7 +667,7 @@ function initPieChart(countryName, sex, svg_graph) {
                       .outerRadius(radius)
 
   // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-  svg_graph.selectAll('whatever')
+  svg_graph.selectAll('path')
           .data(data_ready)
           .enter()
           .append('path')
@@ -648,12 +676,27 @@ function initPieChart(countryName, sex, svg_graph) {
             .innerRadius(0)
             .outerRadius(radius)
           )*/
-          .attr('fill', function(d){ return(color(d.data.key)) })
+          .attr('fill', function(d){ return(colorPieChart(d.data.key)) })
           .attr("stroke", "white")
           .style("stroke-width", "2px")
           .style("opacity", 0.9)
+          .on("mouseover", function(d) {
+            activityName.transition()        
+                .duration(200)
+                .style("opacity", .9);      
+                activityName.html("Country: " + d.data.key)  
+                .style("left", (d3.event.pageX + 30) + "px")     
+                .style("top", (d3.event.pageY - 30) + "px")
 
-  var k = 3;
+          })
+          .on("mouseout", function(d) {
+            activityName.style("opacity", 0);
+            activityName.html("")
+                  .style("left", "-5000px")
+                  .style("top", "-5000px");
+          }); 
+
+  /*var k = 3;
   svg_graph.selectAll('mySlices')
           .data(data_ready)
           .enter()
@@ -665,7 +708,7 @@ function initPieChart(countryName, sex, svg_graph) {
           else return ""})
           .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
           .style("text-anchor", "middle")
-          .style("font-size", 17)
+          .style("font-size", 17)*/
 
 }
 
@@ -682,8 +725,7 @@ function updatePieChart(data, svg_graph) {
     .data(data_ready)
 
   // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-  u
-    .enter()
+  u.enter()
     .append('path')
     .merge(u)
     .transition()
@@ -692,19 +734,18 @@ function updatePieChart(data, svg_graph) {
       .innerRadius(0)
       .outerRadius(radius)
     )
-    .attr('fill', function(d){ return(color(d.data.key)) })
+    .attr('fill', function(d){ return(colorPieChart(d.data.key)) })
     .attr("stroke", "white")
     .style("stroke-width", "2px")
     .style("opacity", 0.9)
 
   // remove the group that is not present anymore
-  u
-    .exit()
+  u.exit()
     .remove()
 	
 }
 
-function changePieChart(countryName, sex, svg_graph) {
+function changePieChart(countryName, sex, svg_graph, start, stop) {
     //pie charts update
     //currentCountry = countryName;
     timeCurrentCountry = [];
@@ -719,7 +760,7 @@ function changePieChart(countryName, sex, svg_graph) {
   
     var have = [];
   
-    for (let i = 0; i < 10; i++) {
+    for (let i = start; i < stop; i++) {
       const time = timeCurrentCountry[i];
       const activity = correspondingActivities[i];
       have.push([activity, time]);
@@ -732,14 +773,18 @@ function changePieChart(countryName, sex, svg_graph) {
       a[v[0]] = v[1];
       return a;
     }, {});
+
     updatePieChart(want, svg_graph)
 }
 
 
-function init2() {
-  initPieChart("France", "Total", svg_tot)
-  initPieChart("France", "Females", svg_female)
-  initPieChart("France", "Males", svg_male)
+function initFirstPieChart() {
+  initPieChart("France", "Total", svg_tot, 0, 5)
+  initPieChart("France", "Females", svg_female, 0, 5)
+  initPieChart("France", "Males", svg_male, 0, 5)
+  initPieChart("France", "Total", svg_tot_details, 5, 10)
+  initPieChart("France", "Females", svg_female_details, 5, 10)
+  initPieChart("France", "Males", svg_male_details, 5, 10)
 }
 
 var searchBar = document.getElementById("searchBar")
