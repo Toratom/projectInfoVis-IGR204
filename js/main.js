@@ -3,6 +3,7 @@ let w = 1000
 let h = 600
 
 let text = d3.select(".text");
+let activityName = d3.select(".activityName");
 
 let colorCountries; //colorisateur pour la heatmap
 let dataset = []; //full dataset
@@ -177,9 +178,12 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 .style("left", (d3.event.pageX + 30) + "px")     
                 .style("top", (d3.event.pageY - 30) + "px")
 
-            changePieChart(d.properties.name, "Total", svg_tot)
-            changePieChart(d.properties.name, "Females", svg_female)
-            changePieChart(d.properties.name, "Males", svg_male)
+            changePieChart(d.properties.name, "Total", svg_tot, 0, 5)
+            changePieChart(d.properties.name, "Females", svg_female, 0, 5)
+            changePieChart(d.properties.name, "Males", svg_male, 0, 5)
+            changePieChart(d.properties.name, "Total", svg_tot_details, 5, 10)
+            changePieChart(d.properties.name, "Females", svg_female_details, 5, 10)
+            changePieChart(d.properties.name, "Males", svg_male_details, 5, 10)
 
         })
         /*.on("mouseout", function(d) {
@@ -373,9 +377,30 @@ var svg_male = d3.select(".charts")
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
+var svg_tot_details = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var svg_female_details = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+var svg_male_details = d3.select(".charts")
+.append("svg")
+  .attr("width", width)
+  .attr("height", height)
+.append("g")
+  .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
 var color;
 
-function initPieChart(countryName, sex, svg_graph) {
+function initPieChart(countryName, sex, svg_graph, start, stop) {
   //pie charts update
   //currentCountry = countryName;
   timeCurrentCountry = [];
@@ -390,7 +415,7 @@ function initPieChart(countryName, sex, svg_graph) {
 
   var have = [];
 
-  for (let i = 0; i < 10; i++) {
+  for (let i = start; i < stop; i++) {
     const time = timeCurrentCountry[i];
     const activity = correspondingActivities[i];
     have.push([activity, time]);
@@ -425,7 +450,7 @@ function initPieChart(countryName, sex, svg_graph) {
                       .outerRadius(radius)
 
   // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-  svg_graph.selectAll('g')
+  svg_graph.selectAll('path')
           .data(data_ready)
           .enter()
           .append('path')
@@ -438,6 +463,21 @@ function initPieChart(countryName, sex, svg_graph) {
           .attr("stroke", "white")
           .style("stroke-width", "2px")
           .style("opacity", 0.9)
+          .on("mouseover", function(d) {
+            activityName.transition()        
+                .duration(200)
+                .style("opacity", .9);      
+                activityName.html("Country: " + d.data.key)  
+                .style("left", (d3.event.pageX + 30) + "px")     
+                .style("top", (d3.event.pageY - 30) + "px")
+
+          })
+          .on("mouseout", function(d) {
+            activityName.style("opacity", 0);
+            activityName.html("")
+                  .style("left", "-5000px")
+                  .style("top", "-5000px");
+          }); 
 
   /*var k = 3;
   svg_graph.selectAll('mySlices')
@@ -488,7 +528,7 @@ function updatePieChart(data, svg_graph) {
 	
 }
 
-function changePieChart(countryName, sex, svg_graph) {
+function changePieChart(countryName, sex, svg_graph, start, stop) {
     //pie charts update
     //currentCountry = countryName;
     timeCurrentCountry = [];
@@ -503,7 +543,7 @@ function changePieChart(countryName, sex, svg_graph) {
   
     var have = [];
   
-    for (let i = 0; i < 10; i++) {
+    for (let i = start; i < stop; i++) {
       const time = timeCurrentCountry[i];
       const activity = correspondingActivities[i];
       have.push([activity, time]);
@@ -516,14 +556,18 @@ function changePieChart(countryName, sex, svg_graph) {
       a[v[0]] = v[1];
       return a;
     }, {});
+
     updatePieChart(want, svg_graph)
 }
 
 
 function initFirstPieChart() {
-  initPieChart("France", "Total", svg_tot)
-  initPieChart("France", "Females", svg_female)
-  initPieChart("France", "Males", svg_male)
+  initPieChart("France", "Total", svg_tot, 0, 5)
+  initPieChart("France", "Females", svg_female, 0, 5)
+  initPieChart("France", "Males", svg_male, 0, 5)
+  initPieChart("France", "Total", svg_tot_details, 5, 10)
+  initPieChart("France", "Females", svg_female_details, 5, 10)
+  initPieChart("France", "Males", svg_male_details, 5, 10)
 }
 
 var searchBar = document.getElementById("searchBar")
