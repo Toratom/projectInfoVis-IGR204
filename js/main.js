@@ -146,9 +146,10 @@ d3.json(geoJsonUrl, function(error, geojson) {
 
             for (let i = 0; i < correspondingCountries.length; i++) {
               const country = correspondingCountries[i];
-
+              
               if (nameCountry == country){
                 timeUse = timeCurrentActivity[i];
+                
                 [centroid_pixel_x,centroid_pixel_y] = getCountryCentroid(country);
                 // svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
                 // .attr("fill","black").style("background-color","white");
@@ -163,10 +164,12 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png");
                 if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png");
 
+                break;
 
               }
             }
 
+            
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
@@ -214,10 +217,10 @@ d3.tsv("../data/data.csv")
       }
 
   dataset = rows;
-
 for (let i = 0; i < dataset.length; i++) {
   let data = dataset[i];
 
+  
   if (data["activity"]==currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod) {
     timeCurrentActivity.push(data["minutes"]); 
     correspondingCountries.push(data["country"]);
@@ -240,6 +243,7 @@ console.log("Country :",currentCountry,", Times :",timeCurrentCountry);
 colorActivities = d3.scaleSequential()
                 .domain(d3.extent(timeCurrentCountry))
                 .interpolator(d3.interpolateHcl("yellow", "red"));
+
 
 
 //pour voir le pays qui fait le plus l'activité
