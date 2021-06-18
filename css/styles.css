@@ -115,6 +115,7 @@ button:hover {
     left: 0;
     margin: 1em;
     padding: 1em;
+    border-radius: 0.5em;
 }
 
 .solarOrbit {
