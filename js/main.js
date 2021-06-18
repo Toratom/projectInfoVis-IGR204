@@ -113,6 +113,76 @@ let svg = d3.select(".map")
             .attr("height", h)
             .attr("align","center");
 
+// ---------------- load map -------------------- //
+// A projection tells D3 how to orient the GeoJSON features
+let europeProjection = d3.geoMercator()
+.center([ 13, 52 ])
+.scale([ w / 1.5 ])
+.translate([ 0.5 * w , 0.6 * h ])
+function loadMap(){
+// The path generator uses the projection to convert the GeoJSON
+// geometry to a set of coordinates that D3 can understand
+let pathGenerator = d3.geoPath().projection(europeProjection)
+let geoJsonUrl = '../data/europe_features.json';
+d3.json(geoJsonUrl, function(error, geojson) { 
+    if (error) throw error; 
+    // Tell D3 to render a path for each GeoJSON feature
+    svg.selectAll("path")
+          .data(geojson.features)
+          .enter()
+          .append("path")
+          .attr("d", pathGenerator) // This is where the magic happens
+          .attr("stroke", "grey") // Color of the lines themselves
+          .style("fill", function(d) { 
+            //Pour colorier le pays (heatmap) et mettre le logo au pays qui fait le plus l'activité
+            
+            //on colorie avec le temps de l'activité (-1 si pas de temps)
+            let timeUse = -1;
+            let nameCountry = d.properties.name;
+
+            for (let i = 0; i < correspondingCountries.length; i++) {
+              const country = correspondingCountries[i];
+
+              if (nameCountry == country){
+                timeUse = timeCurrentActivity[i];
+                [centroid_pixel_x,centroid_pixel_y] = getCountryCentroid(country);
+                // svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
+                // .attr("fill","black").style("background-color","white");
+                
+                //pour voir pays qui fait le plus l'activité
+                if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_computer_50px.png");
+                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png");
+                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png");
+                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png");
+                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_dog_50px.png");
+                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png");
+                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png");
+                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png");
+
+
+              }
+            }
+            if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
+            else return colorCountries(timeUse)})
+
+          .on("click", function(d) {          
+            text.html("Country: " + d.properties.name)  
+            changePieChart(d.properties.name, "Total", svg_tot)
+            changePieChart(d.properties.name, "Females", svg_female)
+            changePieChart(d.properties.name, "Males", svg_male)
+
+        })
+        /*.on("mouseout", function(d) {
+            text.style("opacity", 0);
+            text.html("")
+                .style("left", "-500px")
+                .style("top", "-500px");
+        });*/
+       
+        
+});
+}
+
 // ---------------- load dataset -------------------- //
 d3.tsv("../data/data.csv")
   .row((d, i) => {
@@ -169,8 +239,9 @@ indexCountryMostDoLaundry = getCountryThatDoesMostActivity("Laundry");
 indexCountryMostDoPets = getCountryThatDoesMostActivity("Walking the dog");
 indexCountryMostDoChildcare = getCountryThatDoesMostActivity("Childcare, except teaching, reading and talking");
 indexCountryMostDoTravel = getCountryThatDoesMostActivity("Travel except travel related to jobs");
-});
 
+loadMap();
+});
 
 
 
@@ -241,76 +312,6 @@ function getCountryCentroid(country){
   // button.style.top = centroid_pixel_y  + margintop+"px";
   // document.getElementsByClassName("map")[0].appendChild(button);  
 }*/
-
-// ---------------- load map -------------------- //
-// A projection tells D3 how to orient the GeoJSON features
-let europeProjection = d3.geoMercator()
-  .center([ 13, 52 ])
-  .scale([ w / 1.5 ])
-  .translate([ 0.5 * w , 0.6 * h ])
-// The path generator uses the projection to convert the GeoJSON
-// geometry to a set of coordinates that D3 can understand
-let pathGenerator = d3.geoPath().projection(europeProjection)
-let geoJsonUrl = '../data/europe_features.json';
-d3.json(geoJsonUrl, function(error, geojson) { 
-    if (error) throw error; 
-    // Tell D3 to render a path for each GeoJSON feature
-    svg.selectAll("path")
-          .data(geojson.features)
-          .enter()
-          .append("path")
-          .attr("d", pathGenerator) // This is where the magic happens
-          .attr("stroke", "grey") // Color of the lines themselves
-          .style("fill", function(d) { 
-            //Pour colorier le pays (heatmap) et mettre le logo au pays qui fait le plus l'activité
-            
-            //on colorie avec le temps de l'activité (-1 si pas de temps)
-            let timeUse = -1;
-            let nameCountry = d.properties.name;
-
-            for (let i = 0; i < correspondingCountries.length; i++) {
-              const country = correspondingCountries[i];
-
-              if (nameCountry == country){
-                timeUse = timeCurrentActivity[i];
-                [centroid_pixel_x,centroid_pixel_y] = getCountryCentroid(country);
-                // svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
-                // .attr("fill","black").style("background-color","white");
-                
-                //pour voir pays qui fait le plus l'activité
-                if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_computer_50px.png");
-                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png");
-                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png");
-                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png");
-                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_dog_50px.png");
-                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png");
-                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png");
-                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png");
-
-
-              }
-            }
-            if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
-            else return colorCountries(timeUse)})
-
-          .on("click", function(d) {   
-            text.html("Country: " + d.properties.name)  
-
-            currentCountry = d.properties.name 
-            changePieChart(d.properties.name, "Total", svg_tot)
-            changePieChart(d.properties.name, "Females", svg_female)
-            changePieChart(d.properties.name, "Males", svg_male)
-
-        })
-        /*.on("mouseout", function(d) {
-            text.style("opacity", 0);
-            text.html("")
-                .style("left", "-500px")
-                .style("top", "-500px");
-        });*/
-       
-        
-});
 
 //pour changer d'activité          
 function changeActivity(id) {
