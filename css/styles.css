@@ -91,10 +91,18 @@ button:hover {
     text-overflow: clip;
 }
 
+.container {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+}
+
 .text {
-    display:block;
-    float:left;
+    display: inline-block;
     background-color:rgb(155, 155, 155);
+    position: absolute;
+    top : 0;
+    left : 0;
     color: beige;
     margin: 1em;
     padding: 1em;
@@ -109,12 +117,15 @@ button:hover {
     left: 0;
     margin: 1em;
     padding: 1em;
+}
+
+.solarOrbit {
+    background-color:rgb(191,191,191);
     border-radius: 0.5em;
 }
 
 .map {
-    display:block;
-    float:left;
+    display: inline-block;
     background-color:rgb(191,191,191);
     border-radius: 0.5em;
 }
