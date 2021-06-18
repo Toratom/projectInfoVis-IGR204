@@ -1,6 +1,7 @@
 // Setting up the svg element for D3 to draw in
-let w = 1280
-let h = 720
+let w = window.innerWidth / 2. - 20
+let h = window.innerHeight / 1.5
+document.getElementsByClassName('container')[0].style.height = h + "px"
 
 let text = d3.select(".text");
 
@@ -246,7 +247,7 @@ function getCountryCentroid(country){
 let europeProjection = d3.geoMercator()
   .center([ 13, 52 ])
   .scale([ w / 1.5 ])
-  .translate([ w / 2, h / 2 ])
+  .translate([ 0.5 * w , 0.6 * h ])
 // The path generator uses the projection to convert the GeoJSON
 // geometry to a set of coordinates that D3 can understand
 let pathGenerator = d3.geoPath().projection(europeProjection)
@@ -292,14 +293,10 @@ d3.json(geoJsonUrl, function(error, geojson) {
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
-          .on("click", function(d) {
-            text.transition()        
-                .duration(200)
-                .style("opacity", .9);      
+          .on("click", function(d) {   
             text.html("Country: " + d.properties.name)  
-                .style("left", (d3.event.pageX + 30) + "px")     
-                .style("top", (d3.event.pageY - 30) + "px")
 
+            currentCountry = d.properties.name 
             changePieChart(d.properties.name, "Total", svg_tot)
             changePieChart(d.properties.name, "Females", svg_female)
             changePieChart(d.properties.name, "Males", svg_male)
@@ -578,4 +575,112 @@ function searchActivities() {
     }
   }
 }
+
+
+//Solar orbit
+
+let datasetSO = []
+for (i = 0; i < 20 ; i++){
+  datasetSO = [ Math.random() * 10, ...datasetSO]
+}
+
+function getDMax(c) {
+    let dmax = -1.
+    let d = 0.
+
+    for (i = 0; i < datasetSO.length; i++) {
+        d = Math.abs(datasetSO[i] -  datasetSO[c])
+        if (d > dmax) dmax = d
+    }
+    return dmax
+}
+
+let N = datasetSO.length
+let center = 0
+let dotR = 10.
+let dMax = getDMax(center) //a update quand center change
+let rMin = (N * dotR) / Math.PI
+let rMax = 5. * rMin
+let theta  = 2 * Math.PI / (N + 1)
+let centerPosX = rMax + 10
+let centerPosY = rMax + 10
+let nbOfScaleCercles = 10
+
+
+let svgSO = d3.select(".solarOrbit").append("svg").attr("width", w).attr("height", h)
+//dessine les échelles
+for (i = 0; i < nbOfScaleCercles; i++) {
+    let r = (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin
+    svgSO.append("circle")
+    .attr("cx", centerPosX)
+    .attr("cy", centerPosY)
+    .attr("r", r)
+    .attr("fill", "none")
+    .attr("stroke", "gray")
+    .attr("stroke-width", "1")
+    .attr("stroke-dasharray", "5,10,5")
+}
+
+
+function draw(){
+  svgSO.selectAll("line")
+        .data(datasetSO)
+        .enter()
+        .append("line")
+        .attr("x1", centerPosX)
+        .attr("y1", centerPosY)
+        .attr("x2", (d, index) => {
+            if (index == center) return centerPosX
+            let distanceToCenter = Math.abs(d -  datasetSO[center])
+            return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
+        })
+        .attr("y2", (d, index) => {
+            if (index == center) return centerPosY
+            let distanceToCenter = Math.abs(d -  datasetSO[center])
+            return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+        })
+        .attr('stroke-width', '1')
+        .attr('stroke', 'black')
+    
+  svgSO.selectAll("circle").filter("dot") //Pour eviter interference avec les cercles de l'échelle ajoute une classe (?) dot et filtre
+        .data(datasetSO)
+        .enter()
+        .append("circle")
+        .attr("r", (d) => dotR)
+        .attr("cx", (d, index)=> {
+            if(index != center) {
+                let distanceToCenter = Math.abs(d -  datasetSO[center])
+                return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
+            }
+            else{
+                return centerPosX
+            }
+        })
+        .attr("cy", (d, index)=>{ 
+            if(index != center) {
+                let distanceToCenter = Math.abs(d -  datasetSO[center])
+                return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+            }
+            else {
+                return centerPosY;
+            }
+        })
+        .attr("fill", (d, index) => {
+            color = d3.interpolate("red", "blue")(index / N)
+            //color = ((index==center)?"red": "black")
+            return color
+        })
+        
+        console.log("test")
+        // svg.append("g")
+        // .attr("class", "x axis")
+        // .attr("transform", "translate(0, " + (h)  +")")
+        // .call(d3.axisBottom(x))
+        // svg.append("g")
+        //     .attr("class", "y axis")
+        //     .call(d3.axisRight(y))
+    
+}
+
+draw()
 
