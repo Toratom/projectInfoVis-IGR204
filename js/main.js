@@ -322,7 +322,7 @@ function changeActivity(id) {
   document.getElementById(id).classList.add('selected');
   for (let i = 0; i < allActivities.length; i++) {
     let otherId = "buttonActivity"+String(i);
-    if (id!=otherId) document.getElementById(otherId).classList.remove('selected');
+    if (id != otherId) document.getElementById(otherId).classList.remove('selected');
   }
   
   currentActivity = document.getElementById(id).innerHTML;
@@ -561,5 +561,23 @@ function init2() {
   initPieChart("France", "Total", svg_tot)
   initPieChart("France", "Females", svg_female)
   initPieChart("France", "Males", svg_male)
+}
+
+var searchBar = document.getElementById("searchBar")
+
+function searchActivities() {
+  let input = searchBar.value.toLowerCase()
+    
+  for (i = 0; i < allActivities.length; i++) { 
+    let id = "buttonActivity" + String(i);
+    if (allActivities[i].toLowerCase().includes(input)) {
+      document.getElementById(id).classList.add('searched');
+      document.getElementById(id).classList.remove('not_searched');
+    }
+    else { 
+      document.getElementById(id).classList.add('not_searched'); 
+      document.getElementById(id).classList.remove('searched');             
+    }
+  }
 }
 
