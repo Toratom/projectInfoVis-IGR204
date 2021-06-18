@@ -115,16 +115,19 @@ let svg = d3.select(".map")
 // ---------------- load map -------------------- //
 // A projection tells D3 how to orient the GeoJSON features
 let europeProjection = d3.geoMercator()
-.center([ 13, 52 ])
-.scale([ w / 1.5 ])
-.translate([ w / 2, h / 2 ])
+                      .center([ 13, 52 ])
+                      .scale([ w / 1.5 ])
+                      .translate([ w / 2, h / 2 ])
+
 function loadMap(){
 // The path generator uses the projection to convert the GeoJSON
 // geometry to a set of coordinates that D3 can understand
 let pathGenerator = d3.geoPath().projection(europeProjection)
 let geoJsonUrl = '../data/europe_features.json';
 d3.json(geoJsonUrl, function(error, geojson) { 
+
     if (error) throw error; 
+
     // Tell D3 to render a path for each GeoJSON feature
     svg.selectAll("path")
           .data(geojson.features)
@@ -161,10 +164,12 @@ d3.json(geoJsonUrl, function(error, geojson) {
 
               }
             }
+
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
           .on("click", function(d) {
+
             text.transition()        
                 .duration(200)
                 .style("opacity", .9);      
@@ -182,9 +187,7 @@ d3.json(geoJsonUrl, function(error, geojson) {
             text.html("")
                 .style("left", "-500px")
                 .style("top", "-500px");
-        });*/
-       
-        
+        });*/        
 });
 }
 
@@ -245,14 +248,15 @@ indexCountryMostDoPets = getCountryThatDoesMostActivity("Walking the dog");
 indexCountryMostDoChildcare = getCountryThatDoesMostActivity("Childcare, except teaching, reading and talking");
 indexCountryMostDoTravel = getCountryThatDoesMostActivity("Travel except travel related to jobs");
 
-loadMap();
+loadMap()
+initFirstPieChart()
 });
 
 
 
 function getCountryCentroid(country){
   
-  let nodes = d3.selectAll("path").nodes();
+  let nodes = svg.selectAll("path").nodes();
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (node.__data__.properties.name==country){
@@ -277,48 +281,6 @@ function getCountryCentroid(country){
   }
   return [centroid_pixel_x,centroid_pixel_y];
 }
-
-/*function calculCenterEachCountry(country){
-
-  // let arrayOfCoordinates = country.geometry.coordinates[country.geometry.coordinates.length-1][0]; //on prend le tableau avec le plus de coordonnées pour correspondre au pays sans les iles
-  // let centroid_x = 0;
-  // let centroid_y = 0;
-  // for (let i = 0; i < arrayOfCoordinates.length; i++) {
-  //   centroid_x += arrayOfCoordinates[i][0];
-  //   centroid_y += arrayOfCoordinates[i][1];
-  // }
-  // centroid_x/=arrayOfCoordinates.length;
-  // centroid_y/=arrayOfCoordinates.length;
-
-  // centroid_pixel_x = europeProjection([centroid_x,centroid_y])[0];
-  // centroid_pixel_y = europeProjection([centroid_x,centroid_y])[1];
-  
-  // console.log(country.getBBox());
-   
-
-  // let img = document.createElement("img");
-  // img.src = "../data/laundry2.png";
-
-  // console.log(document.getElementsByTagName("svg")[0].style);
-  // img.style.left = (centroid_pixel_x - img.width/2)+ "px";
-  // img.style.top = (centroid_pixel_y - img.height/2)+150+"px";
-
-  // //console.log([centroid_x,centroid_y]," ",europeProjection([centroid_x,centroid_y]));
-
-  // img.style.position = "absolute";
-  // document.getElementsByClassName("map")[0].appendChild(img);
-
-  // let button = document.createElement("BUTTON");
-  // button.innerHTML = country.properties.name; 
-  // button.style.position = "absolute";
-  // let margintop = document.getElementsByClassName("container")[0].getBoundingClientRect().top;
-  // let marginLeft = -10//document.getElementsByClassName("container")[0].getBoundingClientRect().left;
-  // button.style.left = centroid_pixel_x + marginLeft+"px";
-  // button.style.top = centroid_pixel_y  + margintop+"px";
-  // document.getElementsByClassName("map")[0].appendChild(button);  
-}*/
-
-
 
 //pour changer d'activité          
 function changeActivity(id) {
@@ -463,7 +425,7 @@ function initPieChart(countryName, sex, svg_graph) {
                       .outerRadius(radius)
 
   // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-  svg_graph.selectAll('whatever')
+  svg_graph.selectAll('g')
           .data(data_ready)
           .enter()
           .append('path')
@@ -477,7 +439,7 @@ function initPieChart(countryName, sex, svg_graph) {
           .style("stroke-width", "2px")
           .style("opacity", 0.9)
 
-  var k = 3;
+  /*var k = 3;
   svg_graph.selectAll('mySlices')
           .data(data_ready)
           .enter()
@@ -489,7 +451,7 @@ function initPieChart(countryName, sex, svg_graph) {
           else return ""})
           .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
           .style("text-anchor", "middle")
-          .style("font-size", 17)
+          .style("font-size", 17)*/
 
 }
 
@@ -506,8 +468,7 @@ function updatePieChart(data, svg_graph) {
     .data(data_ready)
 
   // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
-  u
-    .enter()
+  u.enter()
     .append('path')
     .merge(u)
     .transition()
@@ -522,8 +483,7 @@ function updatePieChart(data, svg_graph) {
     .style("opacity", 0.9)
 
   // remove the group that is not present anymore
-  u
-    .exit()
+  u.exit()
     .remove()
 	
 }
@@ -560,7 +520,7 @@ function changePieChart(countryName, sex, svg_graph) {
 }
 
 
-function init2() {
+function initFirstPieChart() {
   initPieChart("France", "Total", svg_tot)
   initPieChart("France", "Females", svg_female)
   initPieChart("France", "Males", svg_male)
