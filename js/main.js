@@ -242,8 +242,9 @@ function getCountryCentroid(country){
 }*/
 
 // ---------------- load map -------------------- //
-// A projection tells D3 how to orient the GeoJSON features
-let europeProjection = d3.geoMercator()
+function loadMap(){
+  // A projection tells D3 how to orient the GeoJSON features
+  let europeProjection = d3.geoMercator()
   .center([ 13, 52 ])
   .scale([ w / 1.5 ])
   .translate([ w / 2, h / 2 ])
@@ -314,6 +315,7 @@ d3.json(geoJsonUrl, function(error, geojson) {
        
         
 });
+}
 
 //pour changer d'activité          
 function changeActivity(id) {
