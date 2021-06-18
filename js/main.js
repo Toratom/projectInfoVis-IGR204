@@ -280,6 +280,7 @@ function getCountryCentroid(country){
 }
 
 // ---------------- Solar Orbit -------------------- //
+textSO = d3.select(".textSO")
 function getDMax(c) {
   let dmax = -1.
   let d = 0.
@@ -383,6 +384,10 @@ function initSO(){
             //color = ((index==center)?"red": "black")
             return color
         })
+        .on("mouseover", function(d, index) {
+          textSO.html("Country: " + correspondingCountries[index] + "<br>" +
+                      "Value: " + d + " min")
+        })
 }
 
 function updateSO(){
@@ -391,61 +396,62 @@ function updateSO(){
   let center = correspondingCountries.indexOf(currentCountry)
   let dMax = getDMax(center) //a update quand center change
   let theta  = 2 * Math.PI / (N + 1)
+  if (correspondingCountries.includes(currentCountry)) {
+    //Mais à jour les echelles car N a possiblement change donc rmin aussi
+    svgSO.selectAll(".scaleCercle").attr("r", (d, i) => {return (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin})
 
-  //Mais à jour les echelles car N a possiblement change donc rmin aussi
-  svgSO.selectAll(".scaleCercle").attr("r", (d, i) => {return (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin})
-
-  var pathLine = svgSO.selectAll("line").data(timeCurrentActivity)
-  pathLine.enter()
-        .append("line")
-        .merge(pathLine)
-        .transition()
-        .duration(1000)
-        .attr("x1", centerPosX)
-        .attr("y1", centerPosY)
-        .attr("x2", (d, index) => {
-            if (index == center) return centerPosX
-            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-            return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
-        })
-        .attr("y2", (d, index) => {
-            if (index == center) return centerPosY
-            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-            return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
-        })
-  pathLine.exit().remove()
-  
-  var pathDot = svgSO.selectAll(".dot").data(timeCurrentActivity)
-  pathDot.enter()
-        .append("circle")
-        .merge(pathDot)
-        .transition()
-        .duration(1000)
-        .attr("r", (d) => dotR)
-        .attr("cx", (d, index)=> {
-            if(index != center) {
-                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-                return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
-            }
-            else{
-                return centerPosX
-            }
-        })
-        .attr("cy", (d, index)=>{ 
-            if(index != center) {
-                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-                return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
-            }
-            else {
-                return centerPosY;
-            }
-        })
-        .attr("fill", (d, index) => {
-            color = d3.interpolate("red", "blue")(index / N)
-            //color = ((index==center)?"red": "black")
-            return color
-        })
-  pathDot.exit().remove()
+    var pathLine = svgSO.selectAll("line").data(timeCurrentActivity)
+    pathLine.enter()
+          .append("line")
+          .merge(pathLine)
+          .transition()
+          .duration(1000)
+          .attr("x1", centerPosX)
+          .attr("y1", centerPosY)
+          .attr("x2", (d, index) => {
+              if (index == center) return centerPosX
+              let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+              return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
+          })
+          .attr("y2", (d, index) => {
+              if (index == center) return centerPosY
+              let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+              return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+          })
+    pathLine.exit().remove()
+    
+    var pathDot = svgSO.selectAll(".dot").data(timeCurrentActivity)
+    pathDot.enter()
+          .append("circle")
+          .merge(pathDot)
+          .transition()
+          .duration(1000)
+          .attr("r", (d) => dotR)
+          .attr("cx", (d, index)=> {
+              if(index != center) {
+                  let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                  return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
+              }
+              else{
+                  return centerPosX
+              }
+          })
+          .attr("cy", (d, index)=>{ 
+              if(index != center) {
+                  let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                  return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
+              }
+              else {
+                  return centerPosY;
+              }
+          })
+          .attr("fill", (d, index) => {
+              color = d3.interpolate("red", "blue")(index / N)
+              //color = ((index==center)?"red": "black")
+              return color
+          })
+    pathDot.exit().remove()
+  }
 }
 //Fin solar orbit
 
