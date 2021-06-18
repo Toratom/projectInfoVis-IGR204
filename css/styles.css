@@ -11,17 +11,6 @@ h1 {
     height: 10vh;
 }
 
-
-#activities {
-    background-color: white;
-    text-align: center;
-    color: black;
-    overflow-x: scroll;
-    overflow-y: hidden;
-    white-space: nowrap;
-    text-overflow: clip;
-}
-
 .piechart {
     width: 400px;
     height: 400px;
@@ -59,18 +48,10 @@ h1 {
 }
 
 .mode {
-    border: none;
-    background: none;
-    text-transform: uppercase;
-    font-weight: 700;
     color: black;
-    letter-spacing: 1px;
-    font-size: inherit;
-    transition: all 0.3s;
-    outline: none;
 }
 
-.mode:active {
+.mode:active :not(.searched) {
     color: white;
     background: black;
 }
@@ -83,6 +64,31 @@ button:hover {
 .selected {
     color: white;
     background: black;
+}
+
+.not_searched {
+    display: none;
+}
+
+.mode {
+    border: bold 1px black;
+    text-transform: uppercase;
+    font-weight: 700;
+    /*color: black;*/
+    letter-spacing: 1px;
+    font-size: inherit;
+    transition: all 0.3s;
+    outline: none;
+}
+
+#activities {
+    background-color: white;
+    text-align: center;
+    color: black;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    white-space: nowrap;
+    text-overflow: clip;
 }
 
 .text {
