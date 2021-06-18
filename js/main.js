@@ -1,6 +1,6 @@
 // Setting up the svg element for D3 to draw in
-let w = 1280
-let h = 720
+let w = 1000
+let h = 600
 
 let text = d3.select(".text");
 
@@ -25,9 +25,9 @@ let indexCountryMostDoSleep = 0;
 let indexCountryMostDoEating = 0;
 let indexCountryMostDoStudy = 0;
 let indexCountryMostDoLaundry = 0;
-let indexCountryMostDoPets =0;
-let indexCountryMostDoTravel =0;
-let indexCountryMostDoChildcare =0;
+let indexCountryMostDoPets = 0;
+let indexCountryMostDoTravel = 0;
+let indexCountryMostDoChildcare = 0;
 
 
 let allActivities = ["Total"
