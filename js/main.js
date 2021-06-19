@@ -16,6 +16,7 @@ let currentPeriod = "All days of the week";
 
 let colorActivities;
 let currentCountry = "Belgium";
+let neighborsToCurrentCountry = []
 let init = true;
 var timeCurrentCountry = [];
 let correspondingActivities = [];
@@ -146,9 +147,10 @@ d3.json(geoJsonUrl, function(error, geojson) {
 
             for (let i = 0; i < correspondingCountries.length; i++) {
               const country = correspondingCountries[i];
-
+              
               if (nameCountry == country){
                 timeUse = timeCurrentActivity[i];
+                
                 [centroid_pixel_x,centroid_pixel_y] = getCountryCentroid(country);
                 // svg.append("text").text(node.__data__.properties.name).attr("x",centroid_pixel_x).attr("y",centroid_pixel_y)
                 // .attr("fill","black").style("background-color","white");
@@ -166,10 +168,12 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png");
                 if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png");
 
+                break;
 
               }
             }
 
+            
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
 
@@ -184,6 +188,9 @@ d3.json(geoJsonUrl, function(error, geojson) {
 
             //Click pays update currentCountry     
             currentCountry = d.properties.name
+
+            //Update distance to currentCountry
+            neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
             
             text.html("Country: " + d.properties.name)
             updateSO()
@@ -217,10 +224,10 @@ d3.tsv("../data/data.csv")
       }
 
   dataset = rows;
-
 for (let i = 0; i < dataset.length; i++) {
   let data = dataset[i];
 
+  
   if (data["activity"]==currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod) {
     timeCurrentActivity.push(data["minutes"]); 
     correspondingCountries.push(data["country"]);
@@ -245,6 +252,7 @@ colorActivities = d3.scaleSequential()
                 .interpolator(d3.interpolateHcl("yellow", "red"));
 
 
+
 //pour voir le pays qui fait le plus l'activité
 indexCountryMostDoComputing = getCountryThatDoesMostActivity("Computer games");
 indexCountryMostDoSleep = getCountryThatDoesMostActivity("Sleep");
@@ -257,17 +265,16 @@ indexCountryMostDoTravel = getCountryThatDoesMostActivity("Travel except travel 
 
 loadMap()
 initFirstPieChart()
+//neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
 initSO()
 });
 
 
 function getCountryCentroid(country){
-  
   let nodes = svg.selectAll("path").nodes();
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (node.__data__.properties.name==country){
-      
       // let bbox = node.getBBox();
       // let centroid = [bbox.x + bbox.width/3, bbox.y + bbox.height/3];
   
@@ -289,7 +296,22 @@ function getCountryCentroid(country){
   return [centroid_pixel_x,centroid_pixel_y];
 }
 
+function updateNeighborsToCurrentCountry() {
+  let tmp = []
+  let centre1 = getCountryCentroid(currentCountry)
+  let centre2 = 0
+  let d = 0
+  for (const c of correspondingCountries) {
+    centre2 = getCountryCentroid(c)
+    d = Math.sqrt(Math.pow(centre1[0] - centre2[0], 2) + Math.pow(centre1[1] - centre2[1], 2))
+    tmp.push(d)
+  }
+  return tmp
+}
+
 // ---------------- Solar Orbit -------------------- //
+textSO = d3.select(".textSO")
+
 function getDMax(c) {
   let dmax = -1.
   let d = 0.
@@ -299,6 +321,29 @@ function getDMax(c) {
       if (d > dmax) dmax = d
   }
   return dmax
+}
+
+function argsort(array) {
+  const arrayObject = array.map((value, idx) => { return { value, idx }; });
+  arrayObject.sort((a, b) => {
+
+      if (a.value < b.value) {
+
+          return -1;
+
+      }
+
+      if (a.value > b.value) {
+
+          return 1;
+
+      }
+
+      return 0;
+
+  });
+  const argIndices = arrayObject.map(data => data.idx);
+  return argIndices;
 }
 
 
@@ -323,17 +368,7 @@ for (i = 0; i < nbOfScaleCercles; i++) {
 
 
 function initSO(){
-  timeCurrentActivity = [];
-  for (let i = 0; i < dataset.length; i++) {
-    const data = dataset[i];
-
-    if (data["activity"] == currentActivity && data["sex"] == currentSex && data["period"] == currentPeriod){
-      timeCurrentActivity.push(data["minutes"]); 
-      correspondingCountries.push(data["country"]);   
-    }
-  }
   let N = timeCurrentActivity.length
-  console.log(N)
   let rMin = (N * dotR) / Math.PI
   let center = correspondingCountries.indexOf(currentCountry)
   let dMax = getDMax(center) //a update quand center change
@@ -393,69 +428,76 @@ function initSO(){
             //color = ((index==center)?"red": "black")
             return color
         })
+        .on("mouseover", function(d, index) {
+          textSO.html("Country: " + correspondingCountries[index] + "<br>" +
+                      "Value: " + d + " min")
+        })
 }
 
 function updateSO(){
+  countryOrder = argsort(neighborsToCurrentCountry)
+
   let N = timeCurrentActivity.length
   let rMin = (N * dotR) / Math.PI
   let center = correspondingCountries.indexOf(currentCountry)
   let dMax = getDMax(center) //a update quand center change
   let theta  = 2 * Math.PI / (N + 1)
+  if (correspondingCountries.includes(currentCountry)) {
+    //Mais à jour les echelles car N a possiblement change donc rmin aussi
+    svgSO.selectAll(".scaleCercle").attr("r", (d, i) => {return (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin})
 
-  //Mais à jour les echelles car N a possiblement change donc rmin aussi
-  svgSO.selectAll(".scaleCercle").attr("r", (d, i) => {return (rMax - rMin) * (i) / (nbOfScaleCercles - 1) + rMin})
-
-  var pathLine = svgSO.selectAll("line").data(timeCurrentActivity)
-  pathLine.enter()
-        .append("line")
-        .merge(pathLine)
-        .transition()
-        .duration(1000)
-        .attr("x1", centerPosX)
-        .attr("y1", centerPosY)
-        .attr("x2", (d, index) => {
-            if (index == center) return centerPosX
-            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-            return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta)))
-        })
-        .attr("y2", (d, index) => {
-            if (index == center) return centerPosY
-            let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-            return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
-        })
-  pathLine.exit().remove()
-  
-  var pathDot = svgSO.selectAll(".dot").data(timeCurrentActivity)
-  pathDot.enter()
-        .append("circle")
-        .merge(pathDot)
-        .transition()
-        .duration(1000)
-        .attr("r", (d) => dotR)
-        .attr("cx", (d, index)=> {
-            if(index != center) {
-                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-                return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(index * theta))) 
-            }
-            else{
-                return centerPosX
-            }
-        })
-        .attr("cy", (d, index)=>{ 
-            if(index != center) {
-                let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
-                return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
-            }
-            else {
-                return centerPosY;
-            }
-        })
-        .attr("fill", (d, index) => {
-            color = d3.interpolate("red", "blue")(index / N)
-            //color = ((index==center)?"red": "black")
-            return color
-        })
-  pathDot.exit().remove()
+    var pathLine = svgSO.selectAll("line").data(timeCurrentActivity)
+    pathLine.enter()
+          .append("line")
+          .merge(pathLine)
+          .transition()
+          .duration(1000)
+          .attr("x1", centerPosX)
+          .attr("y1", centerPosY)
+          .attr("x2", (d, index) => {
+              if (index == center) return centerPosX
+              let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+              return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(countryOrder.indexOf(index) * theta)))
+          })
+          .attr("y2", (d, index) => {
+              if (index == center) return centerPosY
+              let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+              return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(countryOrder.indexOf(index) * theta)))
+          })
+    pathLine.exit().remove()
+    
+    var pathDot = svgSO.selectAll(".dot").data(timeCurrentActivity)
+    pathDot.enter()
+          .append("circle")
+          .merge(pathDot)
+          .transition()
+          .duration(1000)
+          .attr("r", (d) => dotR)
+          .attr("cx", (d, index)=> {
+              if(index != center) {
+                  let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                  return (centerPosX + ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.sin(countryOrder.indexOf(index) * theta))) 
+              }
+              else{
+                  return centerPosX
+              }
+          })
+          .attr("cy", (d, index)=>{ 
+              if(index != center) {
+                  let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
+                  return(centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(countryOrder.indexOf(index) * theta)))
+              }
+              else {
+                  return centerPosY;
+              }
+          })
+          .attr("fill", (d, index) => {
+              color = d3.interpolate("red", "blue")(index / N)
+              //color = ((index==center)?"red": "black")
+              return color
+          })
+    pathDot.exit().remove()
+  }
 }
 //Fin solar orbit
 

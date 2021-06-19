@@ -124,12 +124,10 @@ button:hover {
     justify-content: space-between;
 }
 
-.text {
+.text, .textSO {
+    position: absolute;
     display: inline-block;
     background-color:rgb(155, 155, 155);
-    position: absolute;
-    top : 0;
-    left : 0;
     color: beige;
     margin: 1em;
     padding: 1em;
@@ -144,15 +142,17 @@ button:hover {
     left: 0;
     margin: 1em;
     padding: 1em;
+    border-radius: 0.5em;
 }
 
 .solarOrbit {
+    position:relative;
     background-color:rgb(191,191,191);
     border-radius: 0.5em;
 }
 
 .map {
-    display: inline-block;
+    position:relative;
     background-color:rgb(191,191,191);
     border-radius: 0.5em;
 }
