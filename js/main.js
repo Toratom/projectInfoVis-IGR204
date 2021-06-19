@@ -154,7 +154,10 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 // .attr("fill","black").style("background-color","white");
                 
                 //pour voir pays qui fait le plus l'activité
-                if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_computer_50px.png");
+                //if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_computer_50px.png");
+                if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).style("fill", "url(#grump_avatar)")
+
+                
                 if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png");
                 if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png");
                 if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png");
@@ -496,6 +499,24 @@ function updateSO(){
   // document.getElementsByClassName("map")[0].appendChild(button);  
 }*/
 
+var config = {
+  "avatar_size" : 30
+}
+
+var defs = svg.append('svg:defs');
+
+defs.append("svg:pattern")
+  .attr("id", "grump_avatar")
+  .attr("width", config.avatar_size)
+  .attr("height", config.avatar_size)
+  .attr("patternUnits", "userSpaceOnUse")
+  .append("svg:image")
+  .attr("xlink:href", "../data/images/icons8_computer_50px.png")
+  .attr("width", config.avatar_size)
+  .attr("height", config.avatar_size)
+  .attr("x", 0)
+  .attr("y", 0);
+
 //pour changer d'activité          
 function changeActivity(id) {
   document.getElementById(id).classList.add('selected');
@@ -524,7 +545,7 @@ function changeActivity(id) {
                   .interpolator(d3.interpolateHcl("yellow", "red"));
 
   svg.selectAll("path") // Create the path
-          .style("fill", function(d) { 
+          .style("stroke", function(d) { 
             let timeUse = -1;
             let nameCountry = d.properties.name;
             for (let i = 0; i < correspondingCountries.length; i++) {
@@ -536,6 +557,9 @@ function changeActivity(id) {
 
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
+            .style("stroke-width", "2")
+            .style("fill", "white")
+            //.style("fill", "url(#grump_avatar)");
   //Update le solor orbite
   updateSO()
 }
@@ -562,47 +586,47 @@ for (let i = 0; i < allActivities.length; i++) {
 // set the dimensions and margins of the graph
 var width = 200
     height = 200
-    margin = 40
+    margin = 20
 
 // The radius of the pieplot is half the width or half the height (smallest one). I subtract a bit of margin.
 var radius = Math.min(width, height) / 2 - margin
 
-var svg_tot = d3.select(".charts")
+var svg_tot = d3.select(".pie_tot")
 .append("svg")
   .attr("width", width)
   .attr("height", height)
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var svg_female = d3.select(".charts")
+var svg_female = d3.select(".pie_fem")
 .append("svg")
   .attr("width", width)
   .attr("height", height)
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var svg_male = d3.select(".charts")
+var svg_male = d3.select(".pie_mal")
 .append("svg")
   .attr("width", width)
   .attr("height", height)
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var svg_tot_details = d3.select(".charts")
+var svg_tot_details = d3.select(".pie_tot")
 .append("svg")
   .attr("width", width)
   .attr("height", height)
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var svg_female_details = d3.select(".charts")
+var svg_female_details = d3.select(".pie_fem")
 .append("svg")
   .attr("width", width)
   .attr("height", height)
 .append("g")
   .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-var svg_male_details = d3.select(".charts")
+var svg_male_details = d3.select(".pie_mal")
 .append("svg")
   .attr("width", width)
   .attr("height", height)
@@ -729,6 +753,7 @@ function updatePieChart(data, svg_graph) {
       .outerRadius(radius)
     )
     .attr('fill', function(d){ return(colorPieChart(d.data.key)) })
+    //.attr(url("../data/images/icons8_computer_50px.png"))
     .attr("stroke", "white")
     .style("stroke-width", "2px")
     .style("opacity", 0.9)

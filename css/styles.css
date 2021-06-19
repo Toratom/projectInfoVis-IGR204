@@ -11,7 +11,7 @@ h1 {
     height: 10vh;
 }
 
-.piechart {
+/*.piechart {
     width: 400px;
     height: 400px;
     border-radius: 50%;
@@ -19,7 +19,34 @@ h1 {
         pink 70deg, 
         lightblue 0 235deg, 
         orange 0);
+}*/
+
+
+
+.column {
+    float: left;
+    width: 33%;
+    background-color: antiquewhite;
+    border-radius: 1em;
+    color: red;
+    border: bold 10px rgb(66, 66, 66);
+    /*margin: 0.2em;*/
 }
+  
+/* Clear floats after the columns */
+.charts:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+/*
+.pie_tot {
+    flex: 1
+}
+
+.pie_fem {
+    flex: 1
+}*/
 
 #activitiesContainer ::-webkit-scrollbar {
     width: 1px;
