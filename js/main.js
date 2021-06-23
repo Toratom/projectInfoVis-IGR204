@@ -182,9 +182,9 @@ d3.json(geoJsonUrl, function(error, geojson) {
             changePieChart(d.properties.name, "Total", svg_tot, 0, 5)
             changePieChart(d.properties.name, "Females", svg_female, 0, 5)
             changePieChart(d.properties.name, "Males", svg_male, 0, 5)
-            changePieChart(d.properties.name, "Total", svg_tot_details, 5, 10)
-            changePieChart(d.properties.name, "Females", svg_female_details, 5, 10)
-            changePieChart(d.properties.name, "Males", svg_male_details, 5, 10)
+            changePieChart(d.properties.name, "Total", svg_tot_details, -1, 5)
+            changePieChart(d.properties.name, "Females", svg_female_details, -1, 5)
+            changePieChart(d.properties.name, "Males", svg_male_details, -1, 5)
 
             //Click pays update currentCountry     
             currentCountry = d.properties.name
@@ -586,8 +586,14 @@ function changeActivity(id) {
                   .domain(d3.extent(timeCurrentActivity))
                   .interpolator(d3.interpolateHcl("yellow", "red"));
 
-  svg.selectAll("path") // Create the path
-          .style("stroke", function(d) { 
+  u = svg.selectAll("path")
+  
+  u.enter()
+    .append('path')
+    .merge(u)
+    .transition()
+    .duration(1000)
+          .style("fill", function(d) { 
             let timeUse = -1;
             let nameCountry = d.properties.name;
             for (let i = 0; i < correspondingCountries.length; i++) {
@@ -599,9 +605,35 @@ function changeActivity(id) {
 
             if (timeUse==-1) return "white"; //si on a pas la donnée du pays on met en blanc
             else return colorCountries(timeUse)})
-            .style("stroke-width", "2")
-            .style("fill", "white")
+            //.style("stroke-width", "2")
+            //.style("fill", "white")
             //.style("fill", "url(#grump_avatar)");
+      
+  u.exit()
+    .remove()
+
+   /* var u = svg_graph.selectAll("path")
+    .data(data_ready)
+
+  // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+  u.enter()
+    .append('path')
+    .merge(u)
+    .transition()
+    .duration(1000)
+    .attr('d', d3.arc()
+      .innerRadius(0)
+      .outerRadius(radius)
+    )
+    .attr('fill', function(d){ return(colorPieChart(d.data.key)) })
+    .attr("stroke", "white")
+    .style("stroke-width", "2px")
+    .style("opacity", 0.9)
+
+  // remove the group that is not present anymore
+  u.exit()
+    .remove()
+	*/
   //Update le solor orbite
   updateSO()
 }
@@ -710,11 +742,6 @@ function initPieChart(countryName, sex, svg_graph, start, stop) {
   colorPieChart = d3.scaleOrdinal()
               .domain(want)
               .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"])
-              //.range(d3.schemeDark2);
-
-  /*var color = d3.scaleOrdinal()
-  .domain(correspondingActivities)
-  .range(d3.schemeDark2);*/
 
   // Compute the position of each group on the pie:
   var pie = d3.pie()
@@ -732,10 +759,6 @@ function initPieChart(countryName, sex, svg_graph, start, stop) {
           .enter()
           .append('path')
           .attr('d', arcGenerator)
-          /*.attr('d', d3.arc()
-            .innerRadius(0)
-            .outerRadius(radius)
-          )*/
           .attr('fill', function(d){ return(colorPieChart(d.data.key)) })
           .attr("stroke", "white")
           .style("stroke-width", "2px")
@@ -744,7 +767,7 @@ function initPieChart(countryName, sex, svg_graph, start, stop) {
             activityName.transition()        
                 .duration(200)
                 .style("opacity", .9);      
-                activityName.html("Country: " + d.data.key)  
+                activityName.html(d.data.key + ": " + d.data.value + "min")  
                 .style("left", (d3.event.pageX + 30) + "px")     
                 .style("top", (d3.event.pageY - 30) + "px")
 
@@ -755,21 +778,6 @@ function initPieChart(countryName, sex, svg_graph, start, stop) {
                   .style("left", "-5000px")
                   .style("top", "-5000px");
           }); 
-
-  /*var k = 3;
-  svg_graph.selectAll('mySlices')
-          .data(data_ready)
-          .enter()
-          .append('text')
-          .text(function(d){ if (k > 0) { 
-            k -= 1;
-            return d.data.key;
-          }
-          else return ""})
-          .attr("transform", function(d) { return "translate(" + arcGenerator.centroid(d) + ")";  })
-          .style("text-anchor", "middle")
-          .style("font-size", 17)*/
-
 }
 
 function updatePieChart(data, svg_graph) {
@@ -777,14 +785,14 @@ function updatePieChart(data, svg_graph) {
   // Compute the position of each group on the pie:
   var pie = d3.pie()
     .value(function(d) {return d.value; })
-    .sort(function(a, b) { console.log(a) ; return d3.ascending(a.key, b.key);} ) // This make sure that group order remains the same in the pie chart
+    .sort(function(a, b) {return d3.ascending(a.key, b.key);} )
   var data_ready = pie(d3.entries(data))
 
   // map to data
   var u = svg_graph.selectAll("path")
     .data(data_ready)
 
-  // Build the pie chart: Basically, each part of the pie is a path that we build using the arc function.
+  // Build the pie chart
   u.enter()
     .append('path')
     .merge(u)
@@ -795,22 +803,21 @@ function updatePieChart(data, svg_graph) {
       .outerRadius(radius)
     )
     .attr('fill', function(d){ return(colorPieChart(d.data.key)) })
-    //.attr(url("../data/images/icons8_computer_50px.png"))
     .attr("stroke", "white")
     .style("stroke-width", "2px")
     .style("opacity", 0.9)
 
-  // remove the group that is not present anymore
+  // Remove the group that is not present anymore
   u.exit()
     .remove()
 	
 }
 
 function changePieChart(countryName, sex, svg_graph, start, stop) {
-    //pie charts update
-    //currentCountry = countryName;
+
     timeCurrentCountry = [];
     correspondingActivities = [];
+
     for (let i = 0; i < dataset.length; i++) {
       const data = dataset[i];
       if (data["country"]==countryName && data["sex"] == sex && data["period"] == currentPeriod && data['activity']!='Total'){
@@ -818,6 +825,14 @@ function changePieChart(countryName, sex, svg_graph, start, stop) {
         correspondingActivities.push(data["activity"]);   
       }
     }
+
+    console.log(start, stop, timeCurrentCountry.length)
+    if (start < 0) {
+      start = timeCurrentCountry.length - stop - 1
+      stop = timeCurrentCountry.length - 1
+    }
+
+    console.log(start, stop, timeCurrentCountry.length)
   
     var have = [];
   
@@ -843,9 +858,9 @@ function initFirstPieChart() {
   initPieChart("France", "Total", svg_tot, 0, 5)
   initPieChart("France", "Females", svg_female, 0, 5)
   initPieChart("France", "Males", svg_male, 0, 5)
-  initPieChart("France", "Total", svg_tot_details, 5, 10)
-  initPieChart("France", "Females", svg_female_details, 5, 10)
-  initPieChart("France", "Males", svg_male_details, 5, 10)
+  initPieChart("France", "Total", svg_tot_details, -1, 5)
+  initPieChart("France", "Females", svg_female_details, -1, 5)
+  initPieChart("France", "Males", svg_male_details, -1, 5)
 }
 
 var searchBar = document.getElementById("searchBar")

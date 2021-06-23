@@ -1,5 +1,6 @@
 body {
     background-color:rgb(66, 66, 66);
+    font-family: sans-serif;
 }
 
 h1 {
@@ -9,44 +10,23 @@ h1 {
 #activitiesContainer {
     width: 98vw;
     height: 10vh;
+    color:rgb(253, 230, 230);
 }
-
-/*.piechart {
-    width: 400px;
-    height: 400px;
-    border-radius: 50%;
-    background-image: conic-gradient(
-        pink 70deg, 
-        lightblue 0 235deg, 
-        orange 0);
-}*/
-
-
 
 .column {
-    float: left;
-    width: 33%;
     background-color: antiquewhite;
     border-radius: 1em;
-    color: red;
     border: bold 10px rgb(66, 66, 66);
-    /*margin: 0.2em;*/
-}
-  
-/* Clear floats after the columns */
-.charts:after {
-    content: "";
-    display: table;
-    clear: both;
-}
-/*
-.pie_tot {
-    flex: 1
+    margin: 0.5em;
+    width: 33%;
+    text-align: center;
+    font-size: 1em;
 }
 
-.pie_fem {
-    flex: 1
-}*/
+.charts {
+    display: flex;
+    justify-content: space-between;
+}
 
 #activitiesContainer ::-webkit-scrollbar {
     width: 1px;
@@ -109,7 +89,7 @@ button:hover {
 }
 
 #activities {
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.1);
     text-align: center;
     color: black;
     overflow-x: scroll;
@@ -138,8 +118,6 @@ button:hover {
     position: absolute;
     background-color:rgb(155, 155, 155);
     color: beige;
-    top: 0;
-    left: 0;
     margin: 1em;
     padding: 1em;
     border-radius: 0.5em;
@@ -159,4 +137,18 @@ button:hover {
 
 .map::after {
     clear: both;
+}
+
+.searchBarContainer #searchBar {
+    margin: 0.1em;
+    border-radius: 1em;
+}
+
+.searchBarContainer {
+    border-radius: 1em;
+    background-color: antiquewhite;
+    color:rgb(102, 78, 78);
+    font-weight: 500;
+    font-size: large;
+    width: fit-content;
 }

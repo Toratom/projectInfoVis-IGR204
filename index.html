@@ -10,7 +10,10 @@
         <h1>Europe - Time of Use</h1>
         <div id="activitiesContainer">
             <div id="activities"> </div>
-        <input id="searchBar" onkeyup="searchActivities()">
+            <div class="searchBarContainer">
+                Search Bar:
+                <input id="searchBar" placeholder="Search an activity" onkeyup="searchActivities()">
+            </div>
         </div>
 
         
@@ -27,13 +30,13 @@
             <div class="activityName"></div>
 
             <div class="pie_tot column">
-                <div>Total</div>
+                <div>Total | Most & Least done activities</div>
             </div>
             <div class="pie_fem column">
-                <div>Total</div>
+                <div>Female | Most & Least done activities</div>
             </div>
             <div class="pie_mal column">
-                <div>Total</div>
+                <div>Male | Most & Least done activities</div>
             </div>
         </div>
         <script type="text/javascript" src="js/d3/d3.js"></script>
