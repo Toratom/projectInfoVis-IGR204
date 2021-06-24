@@ -32,8 +32,7 @@ let indexCountryMostDoTravel = 0;
 let indexCountryMostDoChildcare = 0;
 
 
-let allActivities = ["Total"
-,"Personal care"
+let allActivities = ["Personal care"
 ,"Sleep"
 ,"Eating"
 ,"Other and/or unspecified personal care"
