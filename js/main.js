@@ -121,7 +121,23 @@ let europeProjection = d3.geoMercator()
 .scale([ w / 1.5 ])
 .translate([ 0.5 * w , 0.6 * h ])
 
+function click_image(d){
+  changePieChart(d.properties.name, "Total", svg_tot, 0, 5)
+  changePieChart(d.properties.name, "Females", svg_female, 0, 5)
+  changePieChart(d.properties.name, "Males", svg_male, 0, 5)
+  changePieChart(d.properties.name, "Total", svg_tot_details, -1, 5)
+  changePieChart(d.properties.name, "Females", svg_female_details, -1, 5)
+  changePieChart(d.properties.name, "Males", svg_male_details, -1, 5)
 
+  //Click pays update currentCountry     
+  currentCountry = d.properties.name
+
+  //Update distance to currentCountry
+  neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
+  
+  text.html("Country: " + d.properties.name)
+  updateSO()
+}
 function loadMap(){
 // The path generator uses the projection to convert the GeoJSON
 // geometry to a set of coordinates that D3 can understand
@@ -159,14 +175,35 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 //if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_computer_50px.png");
                 if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).style("fill", "url(#grump_avatar)")
 
-                
-                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-20/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png").attr("width",30);
-                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-30/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png").attr("width",30);
-                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-20/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png").attr("width",30);
-                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-20/2).attr("y",centroid_pixel_y-80/2).attr("xlink:href", "../data/images/icons8_dog_50px.png").attr("width",30);
-                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-30/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png").attr("width",30);
-                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-40/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png").attr("width",40);
-                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-40/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png").attr("width",40);
+
+                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );
+                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );;
+                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );;
+                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_dog_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );;
+                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );;
+                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );;
+                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png").attr("width",40).on(
+                  "click", ()=>{click_image(d)}
+
+                );;
 
                 break;
 
