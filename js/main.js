@@ -16,6 +16,7 @@ let currentPeriod = "All days of the week";
 
 let colorActivities;
 let currentCountry = "Belgium";
+let center = 0
 let neighborsToCurrentCountry = []
 let init = true;
 var timeCurrentCountry = [];
@@ -130,6 +131,7 @@ function click_image(d){
 
   //Click pays update currentCountry     
   currentCountry = d.properties.name
+  center = correspondingCountries.indexOf(currentCountry)
 
   //Update distance to currentCountry
   neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
@@ -224,6 +226,8 @@ d3.json(geoJsonUrl, function(error, geojson) {
 
             //Click pays update currentCountry     
             currentCountry = d.properties.name
+            center = correspondingCountries.indexOf(currentCountry)
+            
 
             //Update distance to currentCountry
             neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
@@ -402,11 +406,10 @@ for (i = 0; i < nbOfScaleCercles; i++) {
   .attr("stroke-dasharray", "5,10,5")
 }
 
-
 function initSO(){
   let N = timeCurrentActivity.length
   let rMin = (N * dotR) / Math.PI
-  let center = correspondingCountries.indexOf(currentCountry)
+  center = correspondingCountries.indexOf(currentCountry)
   let dMax = getDMax(center) //a update quand center change
   let theta  = 2 * Math.PI / (N + 1)
 
@@ -430,7 +433,13 @@ function initSO(){
             return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(index * theta)))
         })
         .attr('stroke-width', '1')
-        .attr('stroke', 'black')
+        .attr('stroke', (d, index)=>{if ( timeCurrentActivity[center] < d ){return "blue" } else { return "red"}})
+        .on("mouseover", function(d, index) {
+          diff = d - timeCurrentActivity[center]
+          textSO.html("Country: " + correspondingCountries[index] + "<br>" +
+                      "Value: " + d + " min" + "<br>" +
+                      "Distance: " + (diff) )
+        })
   
   svgSO.selectAll("circle")
         .filter(function() {
@@ -466,7 +475,8 @@ function initSO(){
         })
         .on("mouseover", function(d, index) {
           textSO.html("Country: " + correspondingCountries[index] + "<br>" +
-                      "Value: " + d + " min")
+                      "Value: " + d + " min" + "<br>" +
+                      "Distance: " + (d - timeCurrentActivity[center]))
         })
 }
 
@@ -500,6 +510,7 @@ function updateSO(){
               let distanceToCenter = Math.abs(d -  timeCurrentActivity[center])
               return (centerPosY - ((rMax - rMin) * distanceToCenter / dMax + rMin) * (Math.cos(countryOrder.indexOf(index) * theta)))
           })
+          .attr("stroke", (d, index)=>{if (timeCurrentActivity[center] < d  ){return "blue" } else { return "red"}} )
     pathLine.exit().remove()
     
     var pathDot = svgSO.selectAll(".dot").data(timeCurrentActivity)
