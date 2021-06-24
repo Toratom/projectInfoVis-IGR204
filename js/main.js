@@ -160,13 +160,13 @@ d3.json(geoJsonUrl, function(error, geojson) {
                 if (i == indexCountryMostDoComputing) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).style("fill", "url(#grump_avatar)")
 
                 
-                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png");
-                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png");
-                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png");
-                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_dog_50px.png");
-                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png");
-                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png");
-                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-50/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png");
+                if (i == indexCountryMostDoSleep) svg.append("image").attr("x",centroid_pixel_x-20/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_sleeping_in_bed_50px.png").attr("width",30);
+                if (i == indexCountryMostDoEating) svg.append("image").attr("x",centroid_pixel_x-30/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_restaurant_50px.png").attr("width",30);
+                if (i == indexCountryMostDoStudy) svg.append("image").attr("x",centroid_pixel_x-20/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_reading_50px.png").attr("width",30);
+                if (i == indexCountryMostDoPets) svg.append("image").attr("x",centroid_pixel_x-20/2).attr("y",centroid_pixel_y-80/2).attr("xlink:href", "../data/images/icons8_dog_50px.png").attr("width",30);
+                if (i == indexCountryMostDoLaundry) svg.append("image").attr("x",centroid_pixel_x-30/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_washing_machine_50px.png").attr("width",30);
+                if (i == indexCountryMostDoChildcare) svg.append("image").attr("x",centroid_pixel_x-40/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_children_50px.png").attr("width",40);
+                if (i == indexCountryMostDoTravel) svg.append("image").attr("x",centroid_pixel_x-40/2).attr("y",centroid_pixel_y-50/2).attr("xlink:href", "../data/images/icons8_airport_50px.png").attr("width",40);
 
                 break;
 
@@ -192,7 +192,7 @@ d3.json(geoJsonUrl, function(error, geojson) {
             //Update distance to currentCountry
             neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
             
-            text.html("Country: " + d.properties.name)
+            text.html("Country : " + d.properties.name)
             updateSO()
             
         })
