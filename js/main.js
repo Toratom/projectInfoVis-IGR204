@@ -436,9 +436,9 @@ function initSO(){
         .attr('stroke', (d, index)=>{if ( timeCurrentActivity[center] < d ){return "blue" } else { return "red"}})
         .on("mouseover", function(d, index) {
           diff = d - timeCurrentActivity[center]
-          textSO.html("Country: " + correspondingCountries[index] + "<br>" +
-                      "Value: " + d + " min" + "<br>" +
-                      "Distance: " + (diff) )
+          textSO.html("Country : " + correspondingCountries[index] + "<br>" +
+                      "Value : " + d + " min" + "<br>" +
+                      "Distance : " + (diff) )
         })
   
   svgSO.selectAll("circle")
@@ -474,9 +474,9 @@ function initSO(){
             return color
         })
         .on("mouseover", function(d, index) {
-          textSO.html("Country: " + correspondingCountries[index] + "<br>" +
-                      "Value: " + d + " min" + "<br>" +
-                      "Distance: " + (d - timeCurrentActivity[center]))
+          textSO.html("Country : " + correspondingCountries[index] + "<br>" +
+                      "Value : " + d + " min" + "<br>" +
+                      "Distance : " + (d - timeCurrentActivity[center]))
         })
 }
 
