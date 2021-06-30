@@ -681,7 +681,10 @@ function changeActivity(id) {
   u.exit()
     .remove()
 	*/
+
   //Update le solor orbite
+  //Update distance to currentCountry
+  neighborsToCurrentCountry = updateNeighborsToCurrentCountry()
   updateSO()
 }
 
