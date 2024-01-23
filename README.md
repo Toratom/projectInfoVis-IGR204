@@ -16,3 +16,6 @@ The visualization is done on a webpage thanks to [D3.js](https://d3js.org/).
 ## Setup instructions
 * First, a local server needs to be set up. This can be easily done in Visual Studio Code thanks to the extension [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) for instance.
 * Once the server is set up, the visualization can be found on the webpage, ```index.html```.
+
+## Contributors
+[Lucas Teissier](https://github.com/LucasTsr) - [Octave Le Tullier](https://github.com/OctaveLT) - [Thomas Poyet](https://github.com/Toratom)
