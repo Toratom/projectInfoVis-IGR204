@@ -9,7 +9,7 @@ find out how countries distribute their time, and discover whether nearby countr
 
 The visualization is done on a webpage thanks to [D3.js](https://d3js.org/).
 
-![Illustration](img/illustration.jpeg "Visualization of the time spent on the activity \"eating\", with a focus on \"Finland\"")
+![Illustration](illustration.jpeg "Visualization of the time spent on the activity \"eating\", with a focus on \"Finland\"")
 
 ## Setup instructions
 * First, a local server needs to be set up. This can be easily done in Visual Studio Code thanks to the extension [Live Server](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer) for instance.
